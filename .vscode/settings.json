@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "nvme_admin_controller.h": "c"
+    }
+}
