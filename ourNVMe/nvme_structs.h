@@ -44,6 +44,31 @@
 
 #define MIN(X, Y)		(((X) < (Y))? (X) : (Y))
 #define MAX(X, Y)		(((X) > (Y))? (X) : (Y))
+typedef enum _NVME_STATE_E
+{
+	NVME_STATE_DISABLED = 0,
+	NVME_STATE_ENABLED,
+	NVME_STATE_RUNNING,
+	NVME_STATE_SHUTDOWN,
+} NVME_STATE_E;
+
+//from cosmos, just reserve 2 elements.
+typedef struct _NVME_STATUS
+{
+	unsigned int status;
+	unsigned int cacheEn;
+	//NVME_ADMIN_QUEUE_STATUS adminQueueInfo;
+	//NVME_IO_SQ_STATUS ioSqInfo[MAX_NUM_OF_IO_SQ];
+	//NVME_IO_CQ_STATUS ioCqInfo[MAX_NUM_OF_IO_CQ];
+} NVME_CONTEXT;
+
+typedef struct _nvme_cmd_t
+{
+	unsigned short qID; //for schedule
+	unsigned short cmdSlotTag;//for schedule
+	unsigned int cmdSeqNum;
+	unsigned int cmdDword[16];//for sq entry
+}nvme_cmd_t
 
 typedef union _nvme_sq_entry_t
 {

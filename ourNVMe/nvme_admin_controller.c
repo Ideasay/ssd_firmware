@@ -155,15 +155,12 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 
 
-void nvme_main_process()
+void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_sq_entry, nvme_sq_entry_t io_sq_entry, nvme_cmd_t *nvmeCmd)
 {
-	nvme_sq_entry_t admin_sq_entry;
+	int flag = NULL;
 	nvme_cq_entry_t admin_cq_entry;
-	nvme_sq_entry_t io_sq_entry;
 	nvme_cq_entry_t io_cq_entry;
 
-	u32 read_admin_sq = nvme_read_sq_entry(&admin_sq_entry);
-	u32 read_io_sq    = nvme_read_io_sq_entry(&io_sq_entry);//111111111
 	int need_cqe;
 	if((read_admin_sq == FALSE)&&(read_io_sq == FALSE)){
 		usleep(100);
@@ -171,20 +168,20 @@ void nvme_main_process()
 	}
 	else if((read_admin_sq == FALSE)&&(read_io_sq == TRUE))
 	{
-		if((read_io_sq == TRUE)){
-			//xil_printf("FIND IO SQ CMD!\n\r");
-			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);//1111111111111
-			if(need_cqe){
-			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){//!!!!!!!!!!!!!!!!!!!
-				usleep(100);
-			}
-			//xil_printf("WRITE IO CQ DONE!\n\r");
-
-			}
+		//just got the 64 byte cmd words, but how to get cmdSlotTag??
+		nvmeCmd->cmdDword = io_sq_entry;
+		//here process io cmd contains the transform2slice function.
+		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);
+		if(need_cqe){
+		while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){
+			usleep(100);
 		}
+		//xil_printf("WRITE IO CQ DONE!\n\r");
 	}
 	else if(read_admin_sq == TRUE)
 	{
+		//just got the 64 byte cmd words, but how to get cmdSlotTag??
+		nvmeCmd->cmdDword = admin_sq_entry;
 	    need_cqe = process_admin_cmd(&admin_sq_entry, &admin_cq_entry);
 		if(need_cqe){
 			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE){
@@ -192,18 +189,6 @@ void nvme_main_process()
 			}
 			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
-
-        }
-		if((read_io_sq == TRUE)){
-			//xil_printf("FIND IO SQ CMD!\n\r");
-			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);//1111111111111
-			if(need_cqe){
-			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){//!!!!!!!!!!!!!!!!!!!
-				usleep(100);
-			}
-			//xil_printf("WRITE IO CQ DONE!\n\r");
-
-			}
 		}
 	}
 }

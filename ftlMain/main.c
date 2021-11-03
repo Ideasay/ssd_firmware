@@ -75,38 +75,28 @@
 //#include "xscugic_hw.h"
 //#include "xscugic.h"
 //#include "xil_printf.h"
-#include "nvme/debug.h"
 
-#include "nvme/nvme.h"
-
-#include "nvme/host_lld.h"
-
-#include "memory_map.h"
-#include "generate.h"
+//for cosmos.
+/*#include "nvme/nvme.h"
+#include "nvme/host_lld.h"*/
+//for simulation
+//#include "generate.h"
 
 /************************
- *  nvme header
+ *  nvme header begin
  * **********************/
-#include "nvme_admin_controller.h"
+#include "../ourNVMe/nvme_admin_controller.h"
+#include "../ourNVMe/debug.h"
+#include "memory_map.h"
+#include "../ourNVMe/nvme_structs.h"
 
-typedef enum _NVME_STATE_E
-{
-	NVME_STATE_DISABLED = 0,
-	NVME_STATE_ENABLED,
-	NVME_STATE_RUNNING,
-	NVME_STATE_SHUTDOWN,
-} NVME_STATE_E;
-
-//XScuGic GicInstance;
-
-#define Generate     1
-#define Decode       2
-#define Schedule     3
-
-
+/************************
+ *  nvme header end
+ * **********************/
 
 int main()
-{
+{	
+	//init platform
 	u64 a;
     init_platform();
     a=  0-(1<<12) ;
@@ -115,24 +105,15 @@ int main()
     Xil_DCacheDisable();
 	Xil_ICacheDisable();
 
-	//Xil_DisableMMU();
-
 	// Paging table set
 	#define MB (1024*1024)
 	enable_xdma_channels();
     init_nvme_controller(1);
-    NVME_STATE_E state = NVME_STATE_DISABLED;
     while(xdma_msi_enable_get() == 0){
     	usleep(100);
     }
 
-
-    unsigned int exeLlr;
-    unsigned int status;
-    unsigned int count;
-    count=1;
-    status = Generate;
-
+	//init FTL & clear whole disk
 	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 
 	InitFTL();
@@ -143,108 +124,83 @@ int main()
     eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f800);
     xil_printf("erase two channels complete! \r\n");
 
+	//for state machine init
+	unsigned int exeLlr;
+	volatile NVME_CONTEXT g_nvmeTask;
+	NVME_STATE_E state = NVME_STATE_DISABLED;
+	g_nvmeTask.status = state;
+
+	//for sq & cq
+	nvme_cmd_t *nvmeCmd;
+	nvme_sq_entry_t admin_sq_entry;
+	nvme_sq_entry_t io_sq_entry;
+	int flag;
 	while(1)
 	{
+		exeLlr = 1;
 		switch(state)
 		{
+			//COSMOS case NVME_TASK_WAIT_CC_EN	
 			case NVME_STATE_DISABLED:{
 				if(get_reg_cc_en() == 1){
 					state = NVME_STATE_ENABLED;
+					g_nvmeTask.status = state;
 					xil_printf("NVMe Reg CC_EN is set\n\r");
 				}
-				break;
+				//not break, just fall through
 			}
+			//new added state
 			case(NVME_STATE_ENABLED): {
 				state = NVME_STATE_RUNNING;
+				g_nvmeTask.status = state;
+				//init the SQ and CQ
 				init_nvme_controller(0);
 				set_csts_rdy(1);
-//				xdma_msix_vector_print();
+     			//xdma_msix_vector_print();
 				xil_printf("PS Set CSTS RDY \n\r");
-				break;
+				//not break, just fall through
 			}
+			//COSMOS case NVME_TASK_RUNNING
 			case(NVME_STATE_RUNNING): {
 				if(get_reg_cc_en() == 0){
 					state = NVME_STATE_DISABLED;
+					g_nvmeTask.status = state;
 					init_nvme_controller(1);
 					set_csts_rdy(0);
 					xil_printf("Controller Reset \n\r");
 				} else if(get_reg_cc_shn()){
 					state = NVME_STATE_SHUTDOWN;
-//					init_nvme_controller(1);
+					g_nvmeTask.status = state;
+					//init_nvme_controller(1);
 					set_csts_shst(2);
 					xil_printf("Controller Shutdown \n\r");
 				} else {
-					nvme_main_process();
+					//to do
+					//for fetching instctions and decoding
+					u32 read_admin_sq = nvme_read_sq_entry(&admin_sq_entry);
+					u32 read_io_sq    = nvme_read_io_sq_entry(&io_sq_entry);
+					nvme_main_process(read_admin_sq,read_io_sq,admin_sq_entry,io_sq_entry,nvmeCmd);
 				}
 				break;
 			}
+			//COSMOS case NVME_TASK_SHUTDOWN
 			case(NVME_STATE_SHUTDOWN):{
+			//to do. this might be related to CQ!! in COSMOS
 				if(get_reg_cc_en() == 0){
 					state = NVME_STATE_DISABLED;
+					g_nvmeTask.status = state;
 					set_csts_shst(0);
 					set_csts_rdy(0);
 					xil_printf("Controller Restart \n\r");
 				}
 				break;
 			}
-			default: state = NVME_STATE_DISABLED;
-		}
-	}
-   /*
-    */
-	xil_printf("done\r\n");
-	cleanup_platform();
-	return 0;
-}
-
-//////////////////////
-while(1)
-    {
-		exeLlr = 1;
-
-        
-        if(status == Generate)
-        {
-            generateReQ(count);
-            exeLlr=0;
-            status = Decode;
-
-        }
-		else if(status == Decode)
-		{
-			NVME_COMMAND* nvmeCmd_ptr;
-			nvmeCmd_ptr = (NVME_COMMAND *)(NVME_REQ_SIM_ADDR + (count-1)*sizeof(NVME_COMMAND));
-			//unsigned int cmdValid;
-
-			//cmdValid = get_nvme_cmd(&nvmeCmd.qID, &nvmeCmd.cmdSlotTag, &nvmeCmd.cmdSeqNum, nvmeCmd.cmdDword);
-
-			//if(cmdValid == 1)
-			//{
-				//if(nvmeCmd.qID == 0)
-				//{
-					//handle_nvme_admin_cmd(&nvmeCmd);
-				//}
-				//else
-				//{
-					handle_nvme_io_cmd(nvmeCmd_ptr);
-					ReqTransSliceToLowLevel();
-					exeLlr=0;
-					status = Schedule;
-					count++;
-				//}
-			//}
-		}
-		else if(status == Schedule)//exeLlr && (notCompletedNandReqCnt || blockedReqCnt))//(nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) ||
-		{
-			CheckDoneNvmeDmaReq();
-			SchedulingNandReq();
-			status = Generate;
-			while((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt)
-			{
-				CheckDoneNvmeDmaReq();
-				SchedulingNandReq();
+			default: {
+				state = NVME_STATE_DISABLED;
+				g_nvmeTask.status = state;
 			}
-			if(count==5)
-				break;
-		}
-    }
+			//xil_printf("======NVMe Test End========\n\r");
+    	cleanup_platform();
+    	return 0;
+	}
+	

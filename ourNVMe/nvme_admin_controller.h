@@ -40,7 +40,7 @@ void init_nvme_controller(int flag);
 int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 
 // NVMe main process: including read sq_entry, process command, write cq_entry
-void nvme_main_process();
+void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_sq_entry, nvme_sq_entry_t io_sq_entry, nvme_cmd_t *nvmeCmd);
 
 
 
