@@ -46,7 +46,7 @@
 #ifndef REQUEST_FORMAT_H_
 #define REQUEST_FORMAT_H_
 
-#include "nvme/nvme.h"
+#include "../cosmosNVMe/nvme.h"
 
 #define REQ_TYPE_SLICE			0x0
 #define REQ_TYPE_NAND			0x1

@@ -3,6 +3,9 @@
         "nvme_admin_controller.h": "c",
         "memory_map.h": "c",
         "nvme_io_cmds.h": "c",
-        "nvme_structs.h": "c"
+        "nvme_structs.h": "c",
+        "request_allocation.h": "c",
+        "address_translation.h": "c",
+        "nvme.h": "c"
     }
 }

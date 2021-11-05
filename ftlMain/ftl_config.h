@@ -4,7 +4,7 @@
 
 #include "nsc_driver.h"
 #include "xparameters.h"
-#include "nvme/nvme.h"
+#include "../cosmosNVMe/nvme.h"
 
 
 #define NVME_SIM        1
