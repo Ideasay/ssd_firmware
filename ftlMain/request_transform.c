@@ -49,11 +49,14 @@
 
 #include "xil_printf.h"
 #include <assert.h>
-#include "nvme/nvme.h"
-#include "nvme/host_lld.h"
+#include "../cosmosNVMe/nvme.h"
+#include "../ourNVMe/nvme_structs.h"
+#include "../cosmosNVMe/host_lld.h"
 #include "memory_map.h"
 #include "ftl_config.h"
 #include "generate.h"
+#include "nvme_io_cmds.h"
+#include "../ourNVMe/nvme_structs.h"
 
 P_ROW_ADDR_DEPENDENCY_TABLE rowAddrDependencyTablePtr;
 
@@ -76,14 +79,19 @@ void InitDependencyTable()
 	}
 }
 
-void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode)
+void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum)
 {
 	unsigned int reqSlotTag, requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, tempLsa, loop, nvmeBlockOffset, nvmeDmaStartIndex, reqCode;
-
+	//new added for transforming req
+	u64 prpCollectedForSlice[prpNum];
+	//init the first prp
+	int prpCnt = 0;
 	requestedNvmeBlock = nlb + 1;
 	transCounter = 0;
 	nvmeDmaStartIndex = 0;
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
+	// to do check the loop value.
+	//we expect the loop is nlb+1 which is same as prpCnt
 	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
 
 	if(cmdCode == IO_NVM_WRITE)
@@ -92,7 +100,72 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		reqCode = REQ_CODE_READ;
 	else
 		assert(!"[WARNING] Not supported command code [WARNING]");
+	if(prpNum == 1)
+	{
+		prpCnt = 1;
+		prpCollectedForSlice[0] = prp[0];
+	}else if(prpNum == 2)
+	{
+		prpCnt = 2;
+		prpCollectedForSlice[0] = prp[0];
+		prpCollectedForSlice[1] = prp[1] & (0-(1<<12));
+	}else
+	{
+		//add prp[0]
+		prpCollectedForSlice[0] = prp[prpCnt++];
+		int left_prp_num = prp_num-1;
+		//next prp should be restored in prpCollectedForSlice array also.
+		u64 next_prplist_addr = prp[1];
+		next_prplist_addr = next_prplist_addr & (0-(1<<2));
+		//prp_list_start_offset = (u32)(prp[1]) & offset_mask;
+		int prp_list_start_offset = (u32)(prp[1]) & ((1<<MEM_PAGE_WIDTH)-1);
+		int prp_offset = prp_list_start_offset >>3;
+		int prp_max_num = 1<<(MEM_PAGE_WIDTH-3);
 
+		for (;left_prp_num>0;)
+		{
+			if(left_prp_num + prp_offset>prp_max_num)
+			{
+				tmp_prp_num = prp_max_num - prp_offset;
+				left_prp_num = left_prp_num - tmp_prp_num +1;
+				tmp_prp_num_for_cycle = tmp_prp_num-1;
+			}
+			else
+			{
+				tmp_prp_num = left_prp_num;
+				left_prp_num = 0;
+				tmp_prp_num_for_cycle = tmp_prp_num;
+			}
+
+			//we store the prp list in ADDR PL_IO_PRP_BUF_BASEADDR also.
+		    write_ioP_h2c_dsc(next_prplist_addr,PL_IO_PRP_BUF_BASEADDR,tmp_prp_num*8);
+		    while((get_io_dma_status() & 0x2) == 0);
+
+		    u32 rd_data[2];
+		    u64 addr_total;
+		    for(int i=0;i<tmp_prp_num_for_cycle;i++)
+		    {
+			    rd_data[0]=Xil_In32(PL_IO_PRP_BUF_BASEADDR+i*8);
+			    rd_data[1]=Xil_In32(PL_IO_PRP_BUF_BASEADDR+i*8+4);
+			    addr_total=((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
+				addr_total= addr_total & (0-(1<<12)) ;
+			    prpCollectedForSlice[prpCnt++] = addr_total;
+		    }
+		    if(tmp_prp_num_for_cycle == tmp_prp_num-1)
+		    {
+			    rd_data[0]=Xil_In32(PL_IO_PRP_BUF_BASEADDR+i*8);
+			    rd_data[1]=Xil_In32(PL_IO_PRP_BUF_BASEADDR+i*8+4);
+			    next_prplist_addr = ((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
+			    next_prplist_addr = next_prplist_addr & (0-(1<<2)) ;
+			    prp_offset = (next_prplist_addr & offset_mask)>>3;
+		    }
+		}
+	}
+
+	xli_printf("%d\n",prpCnt);
+	xli_printf("%d\n",loop);
+	assert(prpCnt == loop);
+	
 	//first transform
 	nvmeBlockOffset = (startLba % NVME_BLOCKS_PER_SLICE);
 	if(loop)
@@ -109,13 +182,13 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex = nvmeDmaStartIndex;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;
-
+	reqPoolPtr->reqPool[reqSlotTag].prpForEachReq = prpCollectedForSlice[0];
 	PutToSliceReqQ(reqSlotTag);
 
 	tempLsa++;
 	transCounter++;
 	nvmeDmaStartIndex += tempNumOfNvmeBlock;
-
+	//to do need to comfirm the loop value. here nvme block is 8192. and lba size for FTL is 4096.
 	//transform continue
 	while(transCounter < loop)
 	{
@@ -131,7 +204,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex = nvmeDmaStartIndex;
 		reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;
 		reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;
-
+		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq = prpCollectedForSlice[transCounter];
 		PutToSliceReqQ(reqSlotTag);
 
 		tempLsa++;
@@ -139,6 +212,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		nvmeDmaStartIndex += tempNumOfNvmeBlock;
 	}
 
+	/*here nvme block is 4096 the same as ftl, so we don't need last transfer.
 	//last transform
 	nvmeBlockOffset = 0;
 	tempNumOfNvmeBlock = (startLba + requestedNvmeBlock) % NVME_BLOCKS_PER_SLICE;
@@ -155,7 +229,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;
 
-	PutToSliceReqQ(reqSlotTag);
+	PutToSliceReqQ(reqSlotTag);*/
 }
 
 

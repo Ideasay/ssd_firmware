@@ -168,10 +168,11 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 	}
 	else if((read_admin_sq == FALSE)&&(read_io_sq == TRUE))
 	{
-		//just got the 64 byte cmd words, but how to get cmdSlotTag??
+		//init nvmecmd
 		nvmeCmd->cmdDword = io_sq_entry;
+		nvmeCmd->cmdSlotTag = 0;
 		//here process io cmd contains the transform2slice function.
-		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);
+		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,cmdSlotTag);
 		if(need_cqe){
 		while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){
 			usleep(100);
@@ -182,6 +183,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 	{
 		//just got the 64 byte cmd words, but how to get cmdSlotTag??
 		nvmeCmd->cmdDword = admin_sq_entry;
+		nvmeCmd->cmdSlotTag = 0;
 	    need_cqe = process_admin_cmd(&admin_sq_entry, &admin_cq_entry);
 		if(need_cqe){
 			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE){

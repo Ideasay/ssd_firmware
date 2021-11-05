@@ -19,12 +19,14 @@ u32 g_buf[1024];
 #include "nvme_regs.h"
 #include "debug.h"
 
+#include "../ftlMain/request_transform.h"
+
 //this header file is used for transform io_cmd to slices.
 //#include "../request_transform.h"
 
 //input should be (nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry) here
 //refer to cosmos handle_nvme_io_cmd(NVME_COMMAND *nvmeCmd)
-int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
+int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry, unsigned short cmdSlotTag);
 
 //refer to void handle_nvme_io_read
 void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry);

@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "nvme_admin_controller.h": "c",
-        "memory_map.h": "c"
+        "memory_map.h": "c",
+        "nvme_io_cmds.h": "c",
+        "nvme_structs.h": "c"
     }
 }

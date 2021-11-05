@@ -44,6 +44,8 @@
 
 #define MIN(X, Y)		(((X) < (Y))? (X) : (Y))
 #define MAX(X, Y)		(((X) > (Y))? (X) : (Y))
+
+
 typedef enum _NVME_STATE_E
 {
 	NVME_STATE_DISABLED = 0,
@@ -1200,15 +1202,12 @@ typedef enum _NVME_ADMIN_OPCODE_E
 } NVME_ADMIN_OPCODE_E;
 
 //Opcode for IO Commands
-typedef enum _NVME_IO_OPCODE_E
-{
-	NVME_IO_OPCODE_FLUSH							= 0x00,
-	NVME_IO_OPCODE_WRITE							= 0x01,
-	NVME_IO_OPCODE_READ								= 0x02,
-	NVME_IO_OPCODE_WRITE_UNCORRECTABLE				= 0x04,
-	NVME_IO_OPCODE_COMPARE							= 0x05,
-	NVME_IO_OPCODE_MANAGEMENT						= 0x09,
-}NVME_IO_OPCODE_E;
+#define	IO_NVM_FLUSH							0x00,
+#define	IO_NVM_WRITE							0x01,
+#define	IO_NVM_READ								0x02,
+#define	IO_NVM_WRITE_UNCORRECTABLE			    0x04,
+#define	IO_NVM_COMPARE							0x05,
+#define	IO_NVM_MANAGEMENT						0x09,
 
 // Opcodes for NVM Commands
 typedef enum _NVME_NVM_OPCODE_E

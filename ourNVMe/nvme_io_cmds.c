@@ -1,4 +1,5 @@
 #include "nvme_io_cmds.h"
+#include "../ourNVMe/nvme_structs.h"
 
 //#define debug 0
 //changed in 1030
@@ -218,7 +219,6 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 {
 	nvme_sq_read_dw12_t* sq_entry_dw12;
 
-	//u32 startLba[2];
 	u32 nlb;
     u64 prp[2];
 	u64 prp2_trans;
@@ -232,11 +232,7 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
     u32 first_length;
     u32 tmp_length;
     u64 next_prplist_addr;
-    //u32 start_len;
-    //u32 last_len_tmp;
-    //u32 last_len;
 	u32 first_time;
-    //u32 prp_mask;
 
     u32 left_prp_num;
     u32 prp_offset;
@@ -244,45 +240,36 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
     u32 tmp_prp_num_for_cycle;
     prp[0] = sq_entry->prp1;
     prp[1] = sq_entry->prp2;
-//#if debug
-    //xil_printf("prp[0] is %x!\n\r",prp[0]);
-    //xil_printf("prp[1] is %x!\n\r",prp[1]);
-//#endif
+
 	sq_entry_dw12 = (nvme_sq_read_dw12_t*)(&sq_entry->dw[12]);
 
-	//startLba[0] = sq_entry->dw[10];
-	//startLba[1] = sq_entry->dw[11];
+	//used for tansform2slice
+	u32 startLba[2];
+	startLba[0] = sq_entry->dw[10];
+	startLba[1] = sq_entry->dw[11];
+
 	nlb = sq_entry_dw12->nlb;
-//#if debug
-	//xil_printf("nlb is %x!\n\r",nlb);
-//#endif
 	data_length = (nlb+1)*LBA_SIZE;
 	offset_mask = (1<<MEM_PAGE_WIDTH)-1;
 	prp_max_num = 1<<(MEM_PAGE_WIDTH-3);
-	//prp_mask = prp_max_num-1;
 	start_offset = (u32)(prp[0]) & offset_mask;
-//#if debug
-	//xil_printf("start_offset is %x!\n\r",start_offset);
-//#endif
 	prp_list_start_offset = (u32)(prp[1]) & offset_mask;
 
 	prp_offset = prp_list_start_offset >>3;
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
-//#if debug
-	//xil_printf("prp num is %d\n\r",prp_num);
-//#endif
-	//start_len = (1<<MEM_PAGE_WIDTH) - start_offset;
-	//last_len_tmp = (start_offset + data_length) & offset_mask;
-	//if(last_len_tmp==0)
-		//last_len = (1<<MEM_PAGE_WIDTH);
-	//else
-		//last_len = last_len_tmp;
+	
+	//this function contains prp decode function
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num);
+	ReqTransSliceToLowLevel();
 	if(prp_num==1)
 	{
 		//xil_printf("only one nvme io write prp transmission is needed!\n\r");
 		//ASSERT(0);
         //trans data
 		//write dsc
+		
+
+		//dma operation is as follows
 		write_ioD_h2c_dsc(prp[0],PL_IO_WRITE_BUF_BASEADDR,data_length);
 		//check done
 		while((get_io_dma_status() & 0x1) == 0);
@@ -382,23 +369,11 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 			    next_prplist_addr = next_prplist_addr & (0-(1<<2)) ;
 			    prp_offset = (next_prplist_addr & offset_mask)>>3;
 		    }
-
-		    //ASSERT(0);
 		}
 	}
-	//to be completed about the ASSERT/storageCapacity_L(ftl_config.c)
-	/*ASSERT(startLba[0] < storageCapacity_L && (startLba[1] < STORAGE_CAPACITY_H || startLba[1] == 0));
-	//ASSERT(nlb < MAX_NUM_OF_NLB);*/
-	//prp1_L prp2_L
-	//ASSERT((sq_entry->dptr[0] & 0xF) == 0 && (sq_entry->dptr[2] & 0xF) == 0); //error
-	//prp1_H prp2_H
-	//ASSERT(sq_entry->dptr[1] < 0x10 && sq_entry->dptr[3] < 0x10);
-
-	//ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, NVME_IO_OPCODE_WRITE);
-
 }
 
-int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
+int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry,unsigned short cmdSlotTag)
 {
 	memset(cq_entry, 0x0, sizeof(nvme_cq_entry_t));
 	int need_cqe = 1;
@@ -406,26 +381,22 @@ int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	cq_entry->cid = cid;
 	switch(sq_entry->opc)
 	{
-		case NVME_IO_OPCODE_FLUSH:
+		case IO_NVM_FLUSH:
 		{
-			//xil_printf("IO Flush Command\r\n");
-			//to be completed nvmeCPL struct is strange somehow
-			/*nvmeCPL.dw[0] = 0;
-			nvmeCPL.specific = 0x0;
-			set_auto_nvme_cpl(nvmeCmd->cmdSlotTag, nvmeCPL.specific, nvmeCPL.statusFieldWord);*/
+			//to be completed
 			break;
 		}
-		case NVME_IO_OPCODE_WRITE:
+		case IO_NVM_WRITE:
 		{
 			//xil_printf("IO Write Command\r\n");
-			handle_nvme_io_write(0, sq_entry);
+			handle_nvme_io_write(cmdSlotTag, sq_entry);
 
 			break;
 			}
-		case NVME_IO_OPCODE_READ:
+		case IO_NVM_READ:
 		{
 			//xil_printf("IO Read Command\r\n");
-			handle_nvme_io_read(0, sq_entry);
+			handle_nvme_io_read(cmdSlotTag, sq_entry);
 			break;
 		}
 		default:
