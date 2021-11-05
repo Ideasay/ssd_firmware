@@ -6,8 +6,12 @@
 #include "xparameters.h"
 #include "../cosmosNVMe/nvme.h"
 
-
-#define NVME_SIM        1
+/**********************
+ * 0 -> cosmos DMA
+ * 1 -> simulation DMA
+ * 2 -> our new DMA
+ * ********************/
+#define NVME_SIM        2
 //checks NSC connection, initializes base address
 #ifdef	XPAR_NANDFLASHCONTROLLER_1_BASEADDR
 #define NSC_1_CONNECTED	1

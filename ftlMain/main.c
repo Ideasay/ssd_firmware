@@ -180,6 +180,7 @@ int main()
 					u32 read_admin_sq = nvme_read_sq_entry(&admin_sq_entry);
 					u32 read_io_sq    = nvme_read_io_sq_entry(&io_sq_entry);
 					nvme_main_process(read_admin_sq,read_io_sq,admin_sq_entry,io_sq_entry,nvmeCmd);
+					exeLlr = 0;
 				}
 				break;
 			}
@@ -200,7 +201,14 @@ int main()
 				g_nvmeTask.status = state;
 			}
 			//xil_printf("======NVMe Test End========\n\r");
-    	cleanup_platform();
+
+		//for scheduling todo
+		/*if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
+		{
+			CheckDoneNvmeDmaReq();
+			SchedulingNandReq();
+		}*/
+		cleanup_platform();
     	return 0;
 	}
 	

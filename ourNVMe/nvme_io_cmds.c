@@ -10,6 +10,7 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	//u32 startLba[2];
 	u32 nlb;
     u64 prp[2];
+	u64 prp2_trans;
 
     u32 offset_mask;
     u32 prp_max_num;
@@ -17,15 +18,10 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
     u32 prp_list_start_offset;
     u32 prp_offset;
     u32 prp_num;
-	u64 prp2_trans;
-    //u32 start_len;
-    //u32 last_len_tmp;
-    //u32 last_len;
     u32 data_length;
     u32 left_length;
     u32 first_length;
     u32 tmp_length;
-    //u32 prp_mask;
     u32 left_prp_num;
     u32 tmp_prp_num;
     u64 next_prplist_addr;
@@ -40,8 +36,10 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 //#endif
 	sq_entry_dw12 = (nvme_sq_read_dw12_t*)(&sq_entry->dw[12]);
 
-	//startLba[0] = sq_entry->dw[10];
-	//startLba[1] = sq_entry->dw[11];
+	//used for tansform2slice
+	u32 startLba[2];
+	startLba[0] = sq_entry->dw[10];
+	startLba[1] = sq_entry->dw[11];
 	nlb = sq_entry_dw12->nlb;
 //#if debug
 	//xil_printf("nlb is %d\n\r",nlb);
@@ -57,6 +55,8 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	prp_list_start_offset = prp[1] & offset_mask;
 	prp_offset = prp_list_start_offset >>3;
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_READ,prp[0],prp[1], prp_num,start_offset,data_length);
+	ReqTransSliceToLowLevel();
 //#if debug
 	//xil_printf("prp num is %d\n\r",prp_num);
 //#endif
@@ -67,7 +67,11 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	//else
 	//	last_len = last_len_tmp;
 
-	if(prp_num==1)
+	//this function contains prp decode function
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length);
+	ReqTransSliceToLowLevel();
+	//our prp logic which has been replaceed in ReqTransSliceToLowLevel()
+	/*if(prp_num==1)
 	{
 //#if debug
 		//xil_printf("only one nvme io read prp transmission is needed!\n\r");
@@ -204,15 +208,7 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 
 
 
-	}
-	//to be completed about the ASSERT/storageCapacity_L
-	/*ASSERT(startLba[0] < storageCapacity_L && (startLba[1] < STORAGE_CAPACITY_H || startLba[1] == 0));
-	//ASSERT(nlb < MAX_NUM_OF_NLB);*/
-	//prp1_L prp2_L
-	//ASSERT((sq_entry->dptr[0] & 0xF) == 0 && (sq_entry->dptr[2] & 0xF) == 0); //error
-	//prp1_H prp2_H
-	//ASSERT(sq_entry->dptr[1] < 0x10 && sq_entry->dptr[3] < 0x10);
-	//ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, NVME_IO_OPCODE_READ);
+	}*/
 }
 
 void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
@@ -222,12 +218,13 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	u32 nlb;
     u64 prp[2];
 	u64 prp2_trans;
-    u32 data_length;
+   
     u32 offset_mask = 0 ;
     u32 prp_max_num = 0 ;
     u32 start_offset =0 ;
     u32 prp_list_start_offset;
     u32 prp_num =0 ;
+	u32 data_length;
     u32 left_length;
     u32 first_length;
     u32 tmp_length;
@@ -261,7 +258,8 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	//this function contains prp decode function
 	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length);
 	ReqTransSliceToLowLevel();
-	if(prp_num==1)
+	//our prp logic which has been replaceed in ReqTransSliceToLowLevel()
+	/*if(prp_num==1)
 	{
 		//xil_printf("only one nvme io write prp transmission is needed!\n\r");
 		//ASSERT(0);
@@ -370,7 +368,7 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 			    prp_offset = (next_prplist_addr & offset_mask)>>3;
 		    }
 		}
-	}
+	}*/
 }
 
 int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry,unsigned short cmdSlotTag)

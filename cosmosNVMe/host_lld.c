@@ -61,6 +61,7 @@
 
 #include "../ftl_config.h"
 #include "memory_map.h"
+#include "../ourNVMe/nvme_transmitter.h"
 extern NVME_CONTEXT g_nvmeTask;
 //extern HOST_DMA_STATUS g_hostDmaStatus;
 //HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;
@@ -590,7 +591,6 @@ void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index)
 }
 void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
 {
-	//to do
 	u64 addr_total = prpEntry;
 	char * databuffer_ptr;
 	databuffer_ptr = (char*)(DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE);
@@ -602,5 +602,19 @@ void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
     g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
     g_hostDmaStatus.autoDmaRxCnt++;
+}
+
+void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
+{
+	u64 addr_total = prpEntry;
+	char * databuffer_ptr;
+	databuffer_ptr = (char*)(DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE);
+	write_ioD_c2h_dsc(addr_total,databuffer_ptr,dataLengthForSlice);// unit is byte!
+	while((get_io_dma_status() & 0x4) == 0);
+    xil_printf("!!! read data from DDR data buffer No.%d complete !!! \r\n", databuffer_index);
+    xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)char_addr_ptr));
+    //unsigned char tempTail;
+    g_hostDmaStatus.fifoTail.autoDmaRx++; 
+    g_hostDmaStatus.autoDmaTxCnt++;
 }
 

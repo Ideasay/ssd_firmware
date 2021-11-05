@@ -677,9 +677,9 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 		while(numOfNvmeBlock < reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock)
 		{
 			if(NVME_SIM == 0)
-			  set_auto_rx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
+				set_auto_rx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
             else if(NVME_SIM == 1)
-              SIM_H2C_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
+            	SIM_H2C_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
 			else // for our real dma trnasfer
 			{
 				H2C_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq, reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice);
@@ -699,6 +699,10 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 			    set_auto_tx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
             else if(NVME_SIM == 1)
             	SIM_C2H_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
+			else // for our real dma trnasfer
+			{
+				H2C_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq, reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice);
+			}
 			numOfNvmeBlock++;
 			dmaIndex++;
 			devAddr += BYTES_PER_NVME_BLOCK;
