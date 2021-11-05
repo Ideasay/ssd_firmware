@@ -79,11 +79,14 @@ void InitDependencyTable()
 	}
 }
 
-void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum)
+void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length)
 {
 	unsigned int reqSlotTag, requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, tempLsa, loop, nvmeBlockOffset, nvmeDmaStartIndex, reqCode;
 	//new added for transforming req
 	u64 prpCollectedForSlice[prpNum];
+	int dataLengthForSlice[prpNum];
+	int left_length;
+	int tmp_length;
 	//init the first prp
 	int prpCnt = 0;
 	requestedNvmeBlock = nlb + 1;
@@ -104,15 +107,21 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	{
 		prpCnt = 1;
 		prpCollectedForSlice[0] = prp[0];
+		prpLengthForSlice[0] = LBA_SIZE - start_offset;
 	}else if(prpNum == 2)
 	{
 		prpCnt = 2;
 		prpCollectedForSlice[0] = prp[0];
 		prpCollectedForSlice[1] = prp[1] & (0-(1<<12));
+		prpLengthForSlice[0] = LBA_SIZE - start_offset;
+		prpLengthForSlice[1] = data_length - prpLengthForSlice[0];
+
 	}else
 	{
 		//add prp[0]
 		prpCollectedForSlice[0] = prp[prpCnt++];
+		prpLengthForSlice[0] = LBA_SIZE - start_offset;
+		left_length = data_length - prpLengthForSlice[0];
 		int left_prp_num = prp_num-1;
 		//next prp should be restored in prpCollectedForSlice array also.
 		u64 next_prplist_addr = prp[1];
@@ -150,6 +159,11 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			    addr_total=((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
 				addr_total= addr_total & (0-(1<<12)) ;
 			    prpCollectedForSlice[prpCnt++] = addr_total;
+				if(left_length>LBA_SIZE)
+				    prpLengthForSlice[prpCnt++] = LBA_SIZE;
+			    else
+				    prpLengthForSlice[prpCnt++] = left_length;
+				left_length = left_length - tmp_length;
 		    }
 		    if(tmp_prp_num_for_cycle == tmp_prp_num-1)
 		    {
@@ -183,6 +197,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;
 	reqPoolPtr->reqPool[reqSlotTag].prpForEachReq = prpCollectedForSlice[0];
+	reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice = prpLengthForSlice[0];
 	PutToSliceReqQ(reqSlotTag);
 
 	tempLsa++;
@@ -205,6 +220,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;
 		reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;
 		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq = prpCollectedForSlice[transCounter];
+		reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice = prpLengthForSlice[transCounter];
 		PutToSliceReqQ(reqSlotTag);
 
 		tempLsa++;
@@ -485,6 +501,7 @@ void SelectLowLevelReqQ(unsigned int reqSlotTag)
 	bufDepCheckReport = CheckBufDep(reqSlotTag);
 	if(bufDepCheckReport == BUF_DEPENDENCY_REPORT_PASS)
 	{
+		//here we trigger the dma between nvme and data buffer. and now we should replace it with our own logic.
 		if(reqPoolPtr->reqPool[reqSlotTag].reqType  == REQ_TYPE_NVME_DMA)
 		{
 			IssueNvmeDmaReq(reqSlotTag);
@@ -663,6 +680,10 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 			  set_auto_rx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
             else if(NVME_SIM == 1)
               SIM_H2C_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
+			else // for our real dma trnasfer
+			{
+				H2C_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq, reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice);
+			}
 			numOfNvmeBlock++;
 			dmaIndex++;
 			devAddr += BYTES_PER_NVME_BLOCK;

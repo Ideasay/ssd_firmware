@@ -60,7 +60,7 @@
 #include "host_lld.h"
 
 #include "../ftl_config.h"
-#include "../memory_map.h"
+#include "memory_map.h"
 extern NVME_CONTEXT g_nvmeTask;
 //extern HOST_DMA_STATUS g_hostDmaStatus;
 //HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;
@@ -587,5 +587,20 @@ void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index)
     //unsigned char tempTail;
     g_hostDmaStatus.fifoTail.autoDmaRx++; //tempTail =
     g_hostDmaStatus.autoDmaTxCnt++;
+}
+void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
+{
+	//to do
+	u64 addr_total = prpEntry;
+	char * databuffer_ptr;
+	databuffer_ptr = (char*)(DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE);
+	write_ioD_h2c_dsc(addr_total,databuffer_ptr,dataLengthForSlice);// unit is byte!
+	while((get_io_dma_status() & 0x1) == 0);
+    xil_printf("!!! copy data to DDR data buffer No.%d complete !!! \r\n", databuffer_index);
+    xil_printf("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)databuffer_ptr));
+    //unsigned char tempTail;
+    g_hostDmaStatus.fifoTail.autoDmaRx++;
+    //g_hostDmaStatus.fifoTail.autoDmaRx++;
+    g_hostDmaStatus.autoDmaRxCnt++;
 }
 

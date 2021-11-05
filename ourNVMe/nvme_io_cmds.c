@@ -259,7 +259,7 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
 	
 	//this function contains prp decode function
-	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num);
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length);
 	ReqTransSliceToLowLevel();
 	if(prp_num==1)
 	{

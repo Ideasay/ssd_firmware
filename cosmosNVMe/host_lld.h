@@ -372,7 +372,7 @@ unsigned int check_auto_rx_dma_partial_done(unsigned int tailIndex, unsigned int
 
 void SIM_H2C_DMA(unsigned int lba , unsigned int databuffer_index);
 void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index);
-
+void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
 //extern HOST_DMA_STATUS g_hostDmaStatus;
 //extern HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;
 

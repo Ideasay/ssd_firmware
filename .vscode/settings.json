@@ -6,6 +6,7 @@
         "nvme_structs.h": "c",
         "request_allocation.h": "c",
         "address_translation.h": "c",
-        "nvme.h": "c"
+        "nvme.h": "c",
+        "nvme_transmitter.h": "c"
     }
 }

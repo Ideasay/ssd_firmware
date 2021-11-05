@@ -169,6 +169,7 @@ typedef struct _SSD_REQ_FORMAT
 	unsigned int prevBlockingReq : 16;
 	unsigned int nextBlockingReq : 16;
 	u64	prpForEachReq;
+	unsigned int dataLengthForSlice;
 
 } SSD_REQ_FORMAT, *P_SSD_REQ_FORMAT;
 
