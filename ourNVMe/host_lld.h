@@ -1,56 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////
-// host_lld.h for Cosmos+ OpenSSD
-// Copyright (c) 2016 Hanyang University ENC Lab.
-// Contributed by Yong Ho Song <yhsong@enc.hanyang.ac.kr>
-//				  Youngjin Jo <yjjo@enc.hanyang.ac.kr>
-//				  Sangjin Lee <sjlee@enc.hanyang.ac.kr>
-//				  Jaewook Kwak <jwkwak@enc.hanyang.ac.kr>
-//
-// This file is part of Cosmos+ OpenSSD.
-//
-// Cosmos+ OpenSSD is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3, or (at your option)
-// any later version.
-//
-// Cosmos+ OpenSSD is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Cosmos+ OpenSSD; see the file COPYING.
-// If not, see <http://www.gnu.org/licenses/>.
-//////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////
-// Company: ENC Lab. <http://enc.hanyang.ac.kr>
-// Engineer: Sangjin Lee <sjlee@enc.hanyang.ac.kr>
-//			 Jaewook Kwak <jwkwak@enc.hanyang.ac.kr>
-//
-// Project Name: Cosmos+ OpenSSD
-// Design Name: Cosmos+ Firmware
-// Module Name: NVMe Low Level Driver
-// File Name: host_lld.h
-//
-// Version: v1.1.0
-//
-// Description:
-//   - defines parameters and data structures of the NVMe low level driver
-//   - declares functions of the NVMe low level driver
-//////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////
-// Revision History:
-//
-// * v1.1.0
-//   - new DMA status type is added (HOST_DMA_ASSIST_STATUS)
-//	 - DMA partial done check functions are added
-//
-// * v1.0.0
-//   - First draft
-//////////////////////////////////////////////////////////////////////////////////
-
 #ifndef __HOST_LLD_H_
 #define __HOST_LLD_H_
 
@@ -323,52 +270,17 @@ typedef struct _HOST_DMA_ASSIST_STATUS
 	unsigned int autoDmaRxOverFlowCnt;
 } HOST_DMA_ASSIST_STATUS;
 
-HOST_DMA_STATUS g_hostDmaStatus;
-HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;
+//HOST_DMA_STATUS g_hostDmaStatus;
+//HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;
 
-void dev_irq_init();
-
-void dev_irq_handler();
-
-unsigned int check_nvme_cc_en();
-
-void set_nvme_csts_rdy();
-
-void set_nvme_csts_shst(unsigned int shst);
-
-void set_nvme_admin_queue(unsigned int sqValid, unsigned int cqValid, unsigned int cqIrqEn);
-
-unsigned int get_nvme_cmd(unsigned short *qID, unsigned short *cmdSlotTag, unsigned int *cmdSeqNum, unsigned int *cmdDword);
-
-void set_auto_nvme_cpl(unsigned int cmdSlotTag, unsigned int specific, unsigned int statusFieldWord);
-
-void set_nvme_slot_release(unsigned int cmdSlotTag);
-
-void set_nvme_cpl(unsigned int sqId, unsigned int cid, unsigned int specific, unsigned int statusFieldWord);
-
-void set_io_sq(unsigned int ioSqIdx, unsigned int valid, unsigned int cqVector, unsigned int qSzie, unsigned int pcieBaseAddrL, unsigned int pcieBaseAddrH);
-
-void set_io_cq(unsigned int ioCqIdx, unsigned int valid, unsigned int irqEn, unsigned int irqVector, unsigned int qSzie, unsigned int pcieBaseAddrL, unsigned int pcieBaseAddrH);
-
-void set_direct_tx_dma(unsigned int devAddr, unsigned int pcieAddrH, unsigned int pcieAddrL, unsigned int len);
-
-void set_direct_rx_dma(unsigned int devAddr, unsigned int pcieAddrH, unsigned int pcieAddrL, unsigned int len);
-
-void set_auto_tx_dma(unsigned int cmdSlotTag, unsigned int cmd4KBOffset, unsigned int devAddr, unsigned int autoCompletion);
+// not used in our firmware 
+/*void set_auto_tx_dma(unsigned int cmdSlotTag, unsigned int cmd4KBOffset, unsigned int devAddr, unsigned int autoCompletion);
 
 void set_auto_rx_dma(unsigned int cmdSlotTag, unsigned int cmd4KBOffset, unsigned int devAddr, unsigned int autoCompletion);
 
-void check_direct_tx_dma_done();
-
-void check_direct_rx_dma_done();
-
-void check_auto_tx_dma_done();
-
-void check_auto_rx_dma_done();
-
 unsigned int check_auto_tx_dma_partial_done(unsigned int tailIndex, unsigned int tailAssistIndex);
 
-unsigned int check_auto_rx_dma_partial_done(unsigned int tailIndex, unsigned int tailAssistIndex);
+unsigned int check_auto_rx_dma_partial_done(unsigned int tailIndex, unsigned int tailAssistIndex);*/
 
 void SIM_H2C_DMA(unsigned int lba , unsigned int databuffer_index);
 void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index);

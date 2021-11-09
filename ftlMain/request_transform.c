@@ -677,7 +677,7 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 		while(numOfNvmeBlock < reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock)
 		{
 			if(NVME_SIM == 0)
-				set_auto_rx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
+				/*set_auto_rx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);*/
             else if(NVME_SIM == 1)
             	SIM_H2C_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
 			else // for our real dma trnasfer
@@ -696,7 +696,7 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 		while(numOfNvmeBlock < reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock)
 		{
 			if(NVME_SIM == 0)
-			    set_auto_tx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);
+			    /*set_auto_tx_dma(reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag, dmaIndex, devAddr, NVME_COMMAND_AUTO_COMPLETION_ON);*/
             else if(NVME_SIM == 1)
             	SIM_C2H_DMA(reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr , reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry);
 			else // for our real dma trnasfer
@@ -731,11 +731,11 @@ void CheckDoneNvmeDmaReq()
 		{
 			if(NVME_SIM == 0)
 			{
-				if(!rxDone)
+				/*if(!rxDone)
 				rxDone = check_auto_rx_dma_partial_done(reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.reqTail , reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.overFlowCnt);
 
 			    if(rxDone)
-				   SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
+				   SelectiveGetFromNvmeDmaReqQ(reqSlotTag);*/
 			}
 			else if(NVME_SIM == 1)
 			{
@@ -749,11 +749,11 @@ void CheckDoneNvmeDmaReq()
 		{
 			if(NVME_SIM == 0)
 			{
-				if(!txDone)
+				/*if(!txDone)
 				    txDone = check_auto_tx_dma_partial_done(reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.reqTail , reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.overFlowCnt);
 
 			    if(txDone)
-				    SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
+				    SelectiveGetFromNvmeDmaReqQ(reqSlotTag);*/
 			}
             else if(NVME_SIM == 1)
             {
