@@ -7,6 +7,9 @@
         "request_allocation.h": "c",
         "address_translation.h": "c",
         "nvme.h": "c",
-        "nvme_transmitter.h": "c"
+        "nvme_transmitter.h": "c",
+        "host_lld.h": "c",
+        "request_format.h": "c",
+        "request_queue.h": "c"
     }
 }

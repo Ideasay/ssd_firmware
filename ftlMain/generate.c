@@ -1,5 +1,6 @@
+//for simulating DMA operation
 #include "generate.h"
-#include "nvme/host_lld.h"
+#include "../nvme/host_lld.h"
 void generateReQ(unsigned int count)
 {
 	NVME_COMMAND *nvmeCmd;

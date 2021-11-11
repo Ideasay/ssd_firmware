@@ -85,10 +85,10 @@
 /************************
  *  nvme header begin
  * **********************/
-#include "../ourNVMe/nvme_admin_controller.h"
-#include "../ourNVMe/debug.h"
-#include "memory_map.h"
-#include "../ourNVMe/nvme_structs.h"
+#include "../nvme/nvme_admin_controller.h"
+#include "../nvme/debug.h"
+#include "../nvme/memory_map.h"
+#include "../nvme/nvme_structs.h"
 
 /************************
  *  nvme header end

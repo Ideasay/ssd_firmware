@@ -48,7 +48,6 @@
 #define ADDRESS_TRANSLATION_H_
 
 #include "ftl_config.h"
-#include "../cosmosNVMe/nvme.h"
 
 #define LSA_NONE	0xffffffff
 #define LSA_FAIL	0xffffffff

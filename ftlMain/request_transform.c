@@ -49,14 +49,14 @@
 
 #include "xil_printf.h"
 #include <assert.h>
-#include "../cosmosNVMe/nvme.h"
-#include "../ourNVMe/nvme_structs.h"
-#include "../cosmosNVMe/host_lld.h"
-#include "memory_map.h"
+#include "../nvme/nvme.h"
+#include "../nvme/nvme_structs.h"
+#include "../nvme/host_lld.h"
+#include "../nvme/memory_map.h"
 #include "ftl_config.h"
 #include "generate.h"
-#include "nvme_io_cmds.h"
-#include "../ourNVMe/nvme_structs.h"
+#include "../nvme/nvme_io_cmds.h"
+
 
 P_ROW_ADDR_DEPENDENCY_TABLE rowAddrDependencyTablePtr;
 

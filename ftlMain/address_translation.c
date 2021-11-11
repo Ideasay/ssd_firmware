@@ -46,7 +46,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <assert.h>
-#include "memory_map.h"
+#include "../nvme/memory_map.h"
 #include "xil_printf.h"
 
 P_LOGICAL_SLICE_MAP logicalSliceMapPtr;

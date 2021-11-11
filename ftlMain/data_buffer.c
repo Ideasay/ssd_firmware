@@ -46,7 +46,7 @@
 
 #include "xil_printf.h"
 #include <assert.h>
-#include "memory_map.h"
+#include "../nvme/memory_map.h"
 
 
 P_DATA_BUF_MAP dataBufMapPtr;

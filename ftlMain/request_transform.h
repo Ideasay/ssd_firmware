@@ -47,8 +47,8 @@
 #define REQUEST_TRANSFORM_H_
 
 #include "ftl_config.h"
-#include "../cosmosNVMe/nvme.h"
-#include "../cosmosNVMe/host_lld.h"
+#include "../nvme/nvme.h"
+#include "../nvme/host_lld.h"
 #define NVME_COMMAND_AUTO_COMPLETION_OFF	0
 #define NVME_COMMAND_AUTO_COMPLETION_ON		1
 

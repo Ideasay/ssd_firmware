@@ -1,4 +1,4 @@
 #include "memory_map.h"
-#include "../cosmosNVMe/nvme.h"
+#include "../nvme/nvme.h"
 
 void generateReQ(unsigned int count);

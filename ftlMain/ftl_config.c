@@ -49,7 +49,7 @@
 
 #include <assert.h>
 #include "xil_printf.h"
-#include "memory_map.h"
+#include "../nvme/memory_map.h"
 
 unsigned int storageCapacity_L;
 V2FMCRegisters* chCtlReg[USER_CHANNELS];

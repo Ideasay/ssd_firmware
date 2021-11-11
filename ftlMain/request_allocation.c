@@ -45,7 +45,7 @@
 
 #include "xil_printf.h"
 #include <assert.h>
-#include "memory_map.h"
+#include "../nvme/memory_map.h"
 
 P_REQ_POOL reqPoolPtr;
 FREE_REQUEST_QUEUE freeReqQ;

@@ -47,7 +47,7 @@
 
 #include "xil_printf.h"
 #include <assert.h>
-#include "memory_map.h"
+#include "../nvme/memory_map.h"
 
 P_GC_VICTIM_MAP gcVictimMapPtr;
 

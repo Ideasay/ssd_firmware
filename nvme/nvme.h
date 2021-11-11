@@ -77,6 +77,7 @@
 #define ADMIN_FORMAT_NVM									0x80
 #define ADMIN_SECURITY_SEND									0x81
 #define ADMIN_SECURITY_RECEIVE								0x82
+#define ADMIN_GET_GEOMETRY									0x1b
 
 /*Opcodes for IO Commands */
 #define IO_NVM_FLUSH										0x00
@@ -220,7 +221,7 @@ typedef struct _NVME_ADMIN_COMMAND
 			unsigned int reserved1[2];
 			unsigned int MPTR[2];
 			unsigned int PRP1[2];
-			unsigned int PRP2[2];
+			unsigned int PRP2[2];//dptr
 			unsigned int dword10;
 			unsigned int dword11;
 			unsigned int dword12;
@@ -280,6 +281,8 @@ typedef struct _NVME_COMPLETION
 		};
 	};
 }NVME_COMPLETION;
+
+
 
 typedef struct _ADMIN_SET_FEATURES_DW10
 {
@@ -398,7 +401,7 @@ typedef struct _ADMIN_DELETE_IO_SQ_DW10
 } ADMIN_DELETE_IO_SQ_DW10;
 
 /* Identify Command */
-typedef struct _ADMIN_IDENTIFY_COMMAND_DW10
+typedef struct _ADMIN_IDENTIFY_COMMAND_DW10  //ref
 {
 	union {
 		unsigned int dword;
@@ -424,7 +427,7 @@ typedef struct _ADMIN_GET_LOG_PAGE_DW10
 } ADMIN_GET_LOG_PAGE_DW10;
 
 /* Identify - Power State Descriptor Data Structure */
-typedef struct _ADMIN_IDENTIFY_POWER_STATE_DESCRIPTOR
+typedef struct _ADMIN_IDENTIFY_POWER_STATE_DESCRIPTOR //ref
 {
 	union {
 		unsigned int dword[8];
@@ -821,6 +824,67 @@ typedef struct _NVME_STATUS
 	NVME_IO_SQ_STATUS ioSqInfo[MAX_NUM_OF_IO_SQ];
 	NVME_IO_CQ_STATUS ioCqInfo[MAX_NUM_OF_IO_CQ];
 } NVME_CONTEXT;
+
+typedef struct _ADMIN_GET_GEOMETRY_DPTR{
+	union 
+	{
+		unsigned int dword[2];
+		struct{
+			unsigned int DPTR_H;
+			unsigned int DPTR_L;
+		};
+	};
+}ADMIN_GET_GEOMETRY_DPTR;
+
+typedef struct _ADMIN_GEOMETRY_DATA_STRUCTURE{
+	union 
+	{
+		unsigned int dword[1024];
+		struct 
+		{
+			unsigned char MJR;
+			unsigned char MNR;
+			unsigned char Reserved0[6];
+			union 
+			{
+				unsigned int LBAF[2];
+				struct{
+					unsigned char GBL;//group bit length
+					unsigned char PBL;//pu bit length
+					unsigned char CBL;//chunk bit length
+					unsigned char LBBL;//logical block bit length
+					unsigned int Reserved7;
+				};
+			};
+			unsigned char Reserved1[12];
+			unsigned char WIT;
+			unsigned char Reserved2[31];
+			unsigned short NUM_GRP;
+			unsigned short NUM_PU;
+			unsigned int NUM_CHK;
+			unsigned int CLBA;
+			unsigned int WS_MIN;
+			unsigned int WS_OPT;
+			unsigned int MW_CUNITS;
+			unsigned int MAXOC;
+			unsigned int MAXOCPU;
+			unsigned char Resereved3[44];
+			unsigned int TRDT;
+			unsigned int TRDM;
+			unsigned int TWRT;
+			unsigned int TWRM;
+			unsigned int TCRST;
+			unsigned int TCRSM;
+			unsigned char Reserved4[40];
+			//reserved
+			unsigned char Reserved5[2816];
+			//vendor specific
+			unsigned int Reserved6[256];
+			
+		};	
+	};
+	
+}ADMIN_GEOMETRY_DATA_STRUCTURE;
 
 
 

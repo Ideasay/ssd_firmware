@@ -48,8 +48,8 @@
 
 #include <assert.h>
 #include "xil_printf.h"
-#include "memory_map.h"
-#include "nvme/debug.h"
+#include "../nvme/memory_map.h"
+#include "../nvme/debug.h"
 
 P_COMPLETE_FLAG_TABLE completeFlagTablePtr;
 P_STATUS_REPORT_TABLE statusReportTablePtr;

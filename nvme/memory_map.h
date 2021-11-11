@@ -1,12 +1,12 @@
 #ifndef MEMORY_MAP_H_
 #define MEMORY_MAP_H_
 
-#include "data_buffer.h"
-#include "address_translation.h"
-#include "request_allocation.h"
-#include "request_schedule.h"
-#include "request_transform.h"
-#include "garbage_collection.h"
+#include "../ftlMain/data_buffer.h"
+#include "../ftlMain/garbage_collection.h"
+#include "../ftlMain/request_allocation.h"
+#include "../ftlMain/request_schedule.h"
+#include "../ftlMain/request_transform.h"
+#include "../ftlMain/address_translation.h"
 #include "xparameters.h"
 
 #define DRAM_START_ADDR					XPAR_DDR4_0_BASEADDR + 0x00100000//XPAR_MIG_0_BASEADDR //xparameters
@@ -104,7 +104,8 @@
 
 #define NVME_DATA_SIM_ADDR				    (NVME_REQ_SIM_ADDR + 10*sizeof(NVME_COMMAND))
 *******/
-#define RESERVED1_START_ADDR                (NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
+//#define RESERVED1_START_ADDR                (NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
+#define RESERVED1_START_ADDR                (FTL_MANAGEMENT_END_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
 
 #define RESERVED1_END_ADDR					XPAR_MIG_0_HIGHADDR
 #define DRAM_END_ADDR						XPAR_MIG_0_HIGHADDR

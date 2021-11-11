@@ -7,9 +7,9 @@
 #include "nvme.h"
 #include "host_lld.h"
 
-#include "../ftl_config.h"
+#include "../ftlMain/ftl_config.h"
 #include "memory_map.h"
-#include "../ourNVMe/nvme_transmitter.h"
+#include "../nvme/nvme_transmitter.h"
 extern NVME_CONTEXT g_nvmeTask;
 //extern HOST_DMA_STATUS g_hostDmaStatus;
 //HOST_DMA_ASSIST_STATUS g_hostDmaAssistStatus;

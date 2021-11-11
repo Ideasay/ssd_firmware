@@ -1,5 +1,5 @@
 #include "nvme_io_cmds.h"
-#include "../ourNVMe/nvme_structs.h"
+#include "nvme_structs.h"
 
 //#define debug 0
 //changed in 1030

@@ -4,7 +4,7 @@
 
 #include "nsc_driver.h"
 #include "xparameters.h"
-#include "../cosmosNVMe/nvme.h"
+#include "../nvme/nvme_structs.h"
 
 /**********************
  * 0 -> cosmos DMA
