@@ -743,6 +743,13 @@ void CheckDoneNvmeDmaReq()
 				if(rxDone)
 				   SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
 			}
+			else if(NVME_SIM = 2)
+			{
+				if((get_io_dma_status() & 0x1) != 0)//write
+					rxDone = 1;
+				if(rxDone)
+					SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
+			}
 
 		}
 		else
@@ -758,6 +765,13 @@ void CheckDoneNvmeDmaReq()
             else if(NVME_SIM == 1)
             {
             	txDone=1;
+				if(txDone)
+				   SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
+            }
+			else if(NVME_SIM == 2)
+            {
+				if((get_io_dma_status() & 0x4) != 0)//write
+            		txDone=1;
 				if(txDone)
 				   SelectiveGetFromNvmeDmaReqQ(reqSlotTag);
             }

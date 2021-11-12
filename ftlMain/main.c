@@ -202,12 +202,12 @@ int main()
 			}
 			//xil_printf("======NVMe Test End========\n\r");
 
-		//for scheduling todo
-		/*if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
+		//notCompletedNandReqCnt  blockedReqCnt:extern variates in req_allocation.c
+		if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
 		{
 			CheckDoneNvmeDmaReq();
 			SchedulingNandReq();
-		}*/
+		}
 		cleanup_platform();
     	return 0;
 	}
