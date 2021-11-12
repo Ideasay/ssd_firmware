@@ -93,10 +93,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	transCounter = 0;
 	nvmeDmaStartIndex = 0;
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
-	// to do check the loop value. nvme block is same as slice
-	//we expect the loop is nlb+1 which is same as prpCnt
-	//loop = requestedNvmeBlock = nlb + 1
-	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
+	loop = prpNum;
 
 	if(cmdCode == IO_NVM_WRITE)
 		reqCode = REQ_CODE_WRITE;
