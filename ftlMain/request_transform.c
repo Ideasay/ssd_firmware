@@ -93,8 +93,9 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	transCounter = 0;
 	nvmeDmaStartIndex = 0;
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
-	// to do check the loop value.
+	// to do check the loop value. nvme block is same as slice
 	//we expect the loop is nlb+1 which is same as prpCnt
+	//loop = requestedNvmeBlock = nlb + 1
 	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
 
 	if(cmdCode == IO_NVM_WRITE)
@@ -203,7 +204,6 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	tempLsa++;
 	transCounter++;
 	nvmeDmaStartIndex += tempNumOfNvmeBlock;
-	//to do need to comfirm the loop value. here nvme block is 8192. and lba size for FTL is 4096.
 	//transform continue
 	while(transCounter < loop)
 	{
