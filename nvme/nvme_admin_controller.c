@@ -192,5 +192,16 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
 		}
+
+		if((read_io_sq == TRUE)){
+			//xil_printf("FIND IO SQ CMD!\n\r");
+			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,cmdSlotTag);
+			if(need_cqe){
+			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){
+				usleep(100);
+			}
+			//xil_printf("WRITE IO CQ DONE!\n\r");
+			}
+		}
 	}
 }
