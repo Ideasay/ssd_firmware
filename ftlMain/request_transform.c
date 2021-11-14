@@ -176,7 +176,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 
 	xli_printf("%d\n",prpCnt);
 	xli_printf("%d\n",loop);
-	assert(prpCnt == loop);
+	//assert(prpCnt == loop);
 	
 	//first transform
 	nvmeBlockOffset = (startLba % NVME_BLOCKS_PER_SLICE);
