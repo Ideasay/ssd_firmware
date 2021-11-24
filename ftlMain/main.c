@@ -204,6 +204,7 @@ int main()
 					xil_printf("Controller Restart \n\r");
 				}
 				break;
+				UpdateBadBlockTableForGrownBadBlock(RESERVED_DATA_BUFFER_BASE_ADDR);
 			}
 			default:
 			{
