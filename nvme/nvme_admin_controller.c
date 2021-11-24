@@ -120,13 +120,13 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		case NVME_ADMIN_OPCODE_SET_FEATURE:
 		{
-			set_feature(sq_entry, cq_entry);
+			nvme_set_feature(sq_entry, cq_entry);
 
 			break;
 		}
 		case NVME_ADMIN_OPCODE_GET_FEATURE:
 		{
-			get_feature(sq_entry, cq_entry);
+			nvme_get_feature(sq_entry, cq_entry);
 
 			break;
 		}
@@ -155,53 +155,67 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 
 
-void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_sq_entry, nvme_sq_entry_t io_sq_entry, nvme_cmd_t *nvmeCmd)
+void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_sq_entry, nvme_sq_entry_t io_sq_entry)//, nvme_cmd_t *nvmeCmd
 {
-	int flag = NULL;
+	//int flag = 0;
 	nvme_cq_entry_t admin_cq_entry;
 	nvme_cq_entry_t io_cq_entry;
 
 	int need_cqe;
-	if((read_admin_sq == FALSE)&&(read_io_sq == FALSE)){
-		usleep(100);
+	if((read_admin_sq == FALSE)&&(read_io_sq == FALSE))
+	{
+		//usleep(100);
 		return;
 	}
 	else if((read_admin_sq == FALSE)&&(read_io_sq == TRUE))
 	{
 		//init nvmecmd
-		nvmeCmd->cmdDword = io_sq_entry;
-		nvmeCmd->cmdSlotTag = 0;
+		//nvmeCmd->cmdDword = io_sq_entry;
+		//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
+		//nvmeCmd->cmdSlotTag = 0;
 		//here process io cmd contains the transform2slice function.
-		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,cmdSlotTag);
-		if(need_cqe){
-		while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){
-			usleep(100);
-		}
+		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag
+		if(need_cqe)
+		{
+		    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+		    {
+			    usleep(100);
+		    }
 		//xil_printf("WRITE IO CQ DONE!\n\r");
+	    }
 	}
 	else if(read_admin_sq == TRUE)
 	{
 		//just got the 64 byte cmd words, but how to get cmdSlotTag??
-		nvmeCmd->cmdDword = admin_sq_entry;
-		nvmeCmd->cmdSlotTag = 0;
+		//nvmeCmd->cmdDword = admin_sq_entry;
+		//memcpy(nvmeCmd->cmdDword,&admin_sq_entry,sizeof(nvme_sq_entry_t));
+		//nvmeCmd->cmdSlotTag = 0;
 	    need_cqe = process_admin_cmd(&admin_sq_entry, &admin_cq_entry);
-		if(need_cqe){
-			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE){
+		if(need_cqe)
+		{
+			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE)
+			{
 				usleep(100);
 			}
 			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
 		}
 
-		if((read_io_sq == TRUE)){
+		if((read_io_sq == TRUE))
+		{
 			//xil_printf("FIND IO SQ CMD!\n\r");
-			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,cmdSlotTag);
-			if(need_cqe){
-			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE){
+			//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
+			//nvmeCmd->cmdSlotTag = 0;
+			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag
+			if(need_cqe)
+			{
+			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+			    {
 				usleep(100);
-			}
+			    }
 			//xil_printf("WRITE IO CQ DONE!\n\r");
 			}
 		}
 	}
 }
+

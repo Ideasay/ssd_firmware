@@ -18,16 +18,16 @@
 #define LBA_SIZE 				        (0x1000)
 //#define XDMA_CROSSBAR_ADDR              (0x0000000100000000)
 // XDMA internal registers base address, XPAR_NVME_CONTROLLER_1004_0_BASEADDR
-#define XDMA_REG_BASEADDR  				(0x00040000)
+#define XDMA_REG_BASEADDR  				(XPAR_NVME_CONTROLLER_0_BASEADDR)
 // PL-side user registers base address, XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR
-#define USER_REG_BASEADDR  				(0x00020000)
+#define USER_REG_BASEADDR  				(XPAR_BRAM_0_BASEADDR)
 // PL-side SQ-entry buffer base address, XPAR_AXI_BRAM_CTRL_1_S_AXI_BASEADDR
-#define PL_SQ_ENTRY_BUF_BASEADDR		(0x00030000)
+#define PL_SQ_ENTRY_BUF_BASEADDR		(XPAR_BRAM_1_BASEADDR)
 
 // PL-side SQ-entry buffer size(number of SQ entries)
 #define PL_SQ_ENTRY_NUM 				(8)
 // PL-side CQ-entry buffer base address, XPAR_AXI_BRAM_CTRL_1_S_AXI_BASEADDR
-#define PL_CQ_ENTRY_BUF_BASEADDR		(0x00030000)
+#define PL_CQ_ENTRY_BUF_BASEADDR		(XPAR_BRAM_1_BASEADDR)
 // PL-side CQ-entry buffer size(number of CQ entries)
 #define PL_CQ_ENTRY_NUM					(8)
 
@@ -99,13 +99,13 @@
 
 #define FTL_MANAGEMENT_END_ADDR				((WAY_PRIORITY_TABLE_ADDR + sizeof(WAY_PRIORITY_TABLE))- 1)
 
-/****** nvme segment for simulation
+//****** nvme segment for simulation
 #define NVME_REQ_SIM_ADDR                   (FTL_MANAGEMENT_END_ADDR + 1)
 
 #define NVME_DATA_SIM_ADDR				    (NVME_REQ_SIM_ADDR + 10*sizeof(NVME_COMMAND))
-*******/
-//#define RESERVED1_START_ADDR                (NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
-#define RESERVED1_START_ADDR                (FTL_MANAGEMENT_END_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
+//*******/
+#define RESERVED1_START_ADDR                (NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
+//#define RESERVED1_START_ADDR                (FTL_MANAGEMENT_END_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
 
 #define RESERVED1_END_ADDR					XPAR_MIG_0_HIGHADDR
 #define DRAM_END_ADDR						XPAR_MIG_0_HIGHADDR

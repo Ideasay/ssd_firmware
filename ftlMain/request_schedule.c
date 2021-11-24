@@ -818,10 +818,10 @@ unsigned int GenerateSpareDataBufAddr(unsigned int reqSlotTag)
 
 unsigned int CheckReqStatus(unsigned int chNo, unsigned int wayNo)
 {
-	unsigned int reqSlotTag, completeFlag, statusReport, errorInfo, readyBusy, status;
-	unsigned int* statusReportPtr;
+	unsigned int    status,  readyBusy;// completeFlag,errorInfo,reqSlotTag,statusReport,
+	//unsigned int* statusReportPtr;
 
-	reqSlotTag = nandReqQ[chNo][wayNo].headReq;
+	//reqSlotTag = nandReqQ[chNo][wayNo].headReq;
 	//if(dieStateTablePtr->dieState[chNo][wayNo].reqStatusCheckOpt == REQ_STATUS_CHECK_OPT_COMPLETION_FLAG)
 	//{
 	//	completeFlag = completeFlagTablePtr->completeFlag[chNo][wayNo];
@@ -862,8 +862,8 @@ unsigned int CheckReqStatus(unsigned int chNo, unsigned int wayNo)
 	}
 	else if(dieStateTablePtr->dieState[chNo][wayNo].reqStatusCheckOpt == REQ_STATUS_CHECK_OPT_REPORT)
 	{
-		statusReport = statusReportTablePtr->statusReport[chNo][wayNo];
-        u8 status = ((Xil_In32(base_addr+rNFCStatus) & 0x0000ff00) >> 8);
+		//statusReport = statusReportTablePtr->statusReport[chNo][wayNo];
+        status = ((Xil_In32(base_addr+rNFCStatus) & 0x0000ff00) >> 8);
 
 		if(((Xil_In32(base_addr+rNFCStatus) & 0x0000ff00) >> 8)!=0x0)
 		{

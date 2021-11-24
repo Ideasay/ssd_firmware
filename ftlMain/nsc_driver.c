@@ -16,7 +16,7 @@ void select_row(uint32_t base_addr, uint32_t row)
 	Xil_Out32(base_addr+rAddress, row);
 	Xil_Out32(base_addr+rCommand, 0x00000024);	
 }
-void set_feature(uint32_t base_addr, uint32_t feature)
+void nand_set_feature(uint32_t base_addr, uint32_t feature)
 {
 	Xil_Out32(base_addr+rAddress, feature);
 	Xil_Out32(base_addr+rCommand, 0x00000028);	
@@ -40,7 +40,7 @@ void reset_ffh(uint32_t base_addr, uint32_t way)
 void setfeature_efh(uint32_t base_addr, uint32_t way, uint32_t feature)
 {
 	select_way(base_addr,way);
-	set_feature(base_addr,feature);
+	nand_set_feature(base_addr,feature);
 	Xil_Out32(base_addr+rCommand, 0x00000002);	
 	while(((Xil_In32(base_addr+rNFCStatus) & 0x00000001) == 0x00000000));
 	while(((Xil_In32(base_addr+rNFCStatus) & 0x00000001) == 0x00000001));

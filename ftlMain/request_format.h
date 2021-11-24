@@ -46,7 +46,7 @@
 #ifndef REQUEST_FORMAT_H_
 #define REQUEST_FORMAT_H_
 
-#include "../cosmosNVMe/nvme.h"
+#include "../nvme/nvme.h"
 
 #define REQ_TYPE_SLICE			0x0
 #define REQ_TYPE_NAND			0x1
@@ -168,8 +168,9 @@ typedef struct _SSD_REQ_FORMAT
 	unsigned int nextReq : 16;
 	unsigned int prevBlockingReq : 16;
 	unsigned int nextBlockingReq : 16;
-	u64	prpForEachReq;
-	unsigned int dataLengthForSlice;
+	unsigned int prp_offset_exist;
+	u64	         prpForEachReq[NVME_BLOCKS_PER_SLICE+1];            //  +1 in case of offset exist!!!!!!!!!!!!!
+	unsigned int dataLengthForSlice[NVME_BLOCKS_PER_SLICE+1];
 
 } SSD_REQ_FORMAT, *P_SSD_REQ_FORMAT;
 

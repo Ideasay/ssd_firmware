@@ -580,7 +580,7 @@ void EraseUserBlockSpace()
 void InitBlockDieMap()
 {
 	unsigned int dieNo;
-	unsigned char eraseFlag = 1;
+	//unsigned char eraseFlag = 1;
 
 	//xil_printf("Press 'X' to re-make the bad block table.\r\n");
 	//if (inbyte() == 'X')

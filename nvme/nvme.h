@@ -80,13 +80,14 @@
 #define ADMIN_GET_GEOMETRY									0x1b
 
 /*Opcodes for IO Commands */
+/***************
 #define IO_NVM_FLUSH										0x00
 #define IO_NVM_WRITE										0x01
 #define IO_NVM_READ											0x02
 #define IO_NVM_WRITE_UNCORRECTABLE							0x04
 #define IO_NVM_COMPARE										0x05
 #define IO_NVM_DATASET_MANAGEMENT							0x09
-
+*********************/
 /*Status Code Type */
 #define SCT_GENERIC_COMMAND_STATUS							0
 #define SCT_COMMAND_SPECIFIC_STATUS							1
@@ -815,7 +816,7 @@ typedef struct _NVME_IO_CQ_STATUS
 	unsigned int pcieBaseAddrL;
 	unsigned int pcieBaseAddrH;
 } NVME_IO_CQ_STATUS;
-
+/********   defined in nvme structs.h
 typedef struct _NVME_STATUS
 {
 	unsigned int status;
@@ -824,7 +825,7 @@ typedef struct _NVME_STATUS
 	NVME_IO_SQ_STATUS ioSqInfo[MAX_NUM_OF_IO_SQ];
 	NVME_IO_CQ_STATUS ioCqInfo[MAX_NUM_OF_IO_CQ];
 } NVME_CONTEXT;
-
+*******/
 typedef struct _ADMIN_GET_GEOMETRY_DPTR{
 	union 
 	{

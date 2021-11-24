@@ -165,7 +165,7 @@ unsigned int check_auto_rx_dma_partial_done(unsigned int tailIndex, unsigned int
 	return 0;
 }
 */
-
+/*
 void SIM_H2C_DMA( unsigned int lba , unsigned int databuffer_index)
 {
 	unsigned int datasim_no;
@@ -206,30 +206,31 @@ void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index)
     g_hostDmaStatus.fifoTail.autoDmaRx++; //tempTail =
     g_hostDmaStatus.autoDmaTxCnt++;
 }
-void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
+*/
+void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice,u64 offset)
 {
 	u64 addr_total = prpEntry;
-	char * databuffer_ptr;
-	databuffer_ptr = (char*)(DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE);
+	u64 databuffer_ptr;//char *
+	databuffer_ptr = (DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE + offset);//(char*)
 	write_ioD_h2c_dsc(addr_total,databuffer_ptr,dataLengthForSlice);// unit is byte!
 	while((get_io_dma_status() & 0x1) == 0);
     xil_printf("!!! copy data to DDR data buffer No.%d complete !!! \r\n", databuffer_index);
-    xil_printf("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)databuffer_ptr));
+    xil_printf("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
     g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
     g_hostDmaStatus.autoDmaRxCnt++;
 }
 
-void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice)
+void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice,u64 offset)
 {
 	u64 addr_total = prpEntry;
-	char * databuffer_ptr;
-	databuffer_ptr = (char*)(DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE);
-	write_ioD_c2h_dsc(addr_total,databuffer_ptr,dataLengthForSlice);// unit is byte!
+	u64 databuffer_ptr;//char *
+	databuffer_ptr = (DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE + offset);//(char*)
+	write_ioD_c2h_dsc(addr_total,(u64)databuffer_ptr,dataLengthForSlice);// unit is byte!
 	while((get_io_dma_status() & 0x4) == 0);
     xil_printf("!!! read data from DDR data buffer No.%d complete !!! \r\n", databuffer_index);
-    xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)char_addr_ptr));
+    xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
     g_hostDmaStatus.fifoTail.autoDmaRx++; 
     g_hostDmaStatus.autoDmaTxCnt++;

@@ -70,7 +70,7 @@ typedef struct _nvme_cmd_t
 	unsigned short cmdSlotTag;//for schedule
 	unsigned int cmdSeqNum;
 	unsigned int cmdDword[16];//for sq entry
-}nvme_cmd_t
+}nvme_cmd_t;
 
 typedef union _nvme_sq_entry_t
 {
@@ -1201,13 +1201,13 @@ typedef enum _NVME_ADMIN_OPCODE_E
 	NVME_ADMIN_OPCODE_SANITIZE						= 0x84,
 } NVME_ADMIN_OPCODE_E;
 
-//Opcode for IO Commands
-#define	IO_NVM_FLUSH							0x00,
-#define	IO_NVM_WRITE							0x01,
-#define	IO_NVM_READ								0x02,
-#define	IO_NVM_WRITE_UNCORRECTABLE			    0x04,
-#define	IO_NVM_COMPARE							0x05,
-#define	IO_NVM_MANAGEMENT						0x09,
+//Opcode for IO Commands also defined in nvme.h
+#define	IO_NVM_FLUSH							0x00
+#define	IO_NVM_WRITE							0x01
+#define	IO_NVM_READ								0x02
+#define	IO_NVM_WRITE_UNCORRECTABLE			    0x04
+#define	IO_NVM_COMPARE							0x05
+#define	IO_NVM_MANAGEMENT						0x09
 
 // Opcodes for NVM Commands
 typedef enum _NVME_NVM_OPCODE_E

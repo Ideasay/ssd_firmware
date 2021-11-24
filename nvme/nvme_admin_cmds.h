@@ -38,8 +38,8 @@ void delete_io_sq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void delete_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void identify(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
-void set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
-void get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
+void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
+void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void async_event_req(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void cmd_abort(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 

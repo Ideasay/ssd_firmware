@@ -8,8 +8,8 @@ void generateReQ(unsigned int count)
     nvmeCmd= (NVME_COMMAND *)(NVME_REQ_SIM_ADDR + (count-1)*sizeof(NVME_COMMAND));
     nvmeIOCmd_ptr = (NVME_IO_COMMAND*)nvmeCmd->cmdDword;
     char * char_addr_ptr;
-    unsigned int temp;
-    temp=count/2;
+    //unsigned int temp;
+    //temp=count/2;
 
     if(count==1)
     {

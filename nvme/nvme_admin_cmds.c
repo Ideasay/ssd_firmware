@@ -701,7 +701,7 @@ void identify(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 }
 
 
-void set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
+void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 {
 	nvme_sq_set_feature_dw10_t sq_entry_dw10;
 	sq_entry_dw10.dw = sq_entry->dw[10];
@@ -799,7 +799,7 @@ void set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 }
 
 
-void get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
+void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 {
 	nvme_sq_get_feature_dw10_t sq_entry_dw10;
 	sq_entry_dw10.dw = sq_entry->dw[10];

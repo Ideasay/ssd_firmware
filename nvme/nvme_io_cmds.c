@@ -6,34 +6,15 @@
 void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 {
 	nvme_sq_read_dw12_t* sq_entry_dw12;
-
-	//u32 startLba[2];
 	u32 nlb;
     u64 prp[2];
-	u64 prp2_trans;
-
     u32 offset_mask;
-    u32 prp_max_num;
     u32 start_offset;
-    u32 prp_list_start_offset;
-    u32 prp_offset;
     u32 prp_num;
     u32 data_length;
-    u32 left_length;
-    u32 first_length;
-    u32 tmp_length;
-    u32 left_prp_num;
-    u32 tmp_prp_num;
-    u64 next_prplist_addr;
-    u32 tmp_prp_num_for_cycle;
+
     prp[0] = sq_entry->prp1;
     prp[1] = sq_entry->prp2;
-//#if debug
-    {
-    	//xil_printf("prp[0] is %x!\n\r",prp[0]);
-    	//xil_printf("prp[1] is %x!\n\r",prp[1]);
-    }
-//#endif
 	sq_entry_dw12 = (nvme_sq_read_dw12_t*)(&sq_entry->dw[12]);
 
 	//used for tansform2slice
@@ -41,21 +22,13 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	startLba[0] = sq_entry->dw[10];
 	startLba[1] = sq_entry->dw[11];
 	nlb = sq_entry_dw12->nlb;
-//#if debug
-	//xil_printf("nlb is %d\n\r",nlb);
-//#endif
 	data_length = (nlb+1)*LBA_SIZE;
 	offset_mask = (1<<MEM_PAGE_WIDTH)-1;
-	prp_max_num = 1<<(MEM_PAGE_WIDTH-3);
-	//prp_mask = prp_max_num-1;
 	start_offset = (u32)(prp[0]) & offset_mask;
-//#if debug
-	//xil_printf("start_offset is %x!\n\r",start_offset);
-//#endif
-	prp_list_start_offset = prp[1] & offset_mask;
-	prp_offset = prp_list_start_offset >>3;
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
+
 	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_READ,prp[0],prp[1], prp_num,start_offset,data_length);
+
 	ReqTransSliceToLowLevel();
 }
 
@@ -65,24 +38,11 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 
 	u32 nlb;
     u64 prp[2];
-	u64 prp2_trans;
-   
     u32 offset_mask = 0 ;
-    u32 prp_max_num = 0 ;
     u32 start_offset =0 ;
-    u32 prp_list_start_offset;
     u32 prp_num =0 ;
 	u32 data_length;
-    u32 left_length;
-    u32 first_length;
-    u32 tmp_length;
-    u64 next_prplist_addr;
-	u32 first_time;
 
-    u32 left_prp_num;
-    u32 prp_offset;
-    u32 tmp_prp_num;
-    u32 tmp_prp_num_for_cycle;
     prp[0] = sq_entry->prp1;
     prp[1] = sq_entry->prp2;
 
@@ -96,15 +56,12 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	nlb = sq_entry_dw12->nlb;
 	data_length = (nlb+1)*LBA_SIZE;
 	offset_mask = (1<<MEM_PAGE_WIDTH)-1;
-	prp_max_num = 1<<(MEM_PAGE_WIDTH-3);
 	start_offset = (u32)(prp[0]) & offset_mask;
-	prp_list_start_offset = (u32)(prp[1]) & offset_mask;
-
-	prp_offset = prp_list_start_offset >>3;
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
 	
 	//this function contains prp decode function
 	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length);
+
 	ReqTransSliceToLowLevel();
 }
 

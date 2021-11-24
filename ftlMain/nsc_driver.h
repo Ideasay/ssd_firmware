@@ -64,7 +64,7 @@ void select_col(uint32_t base_addr, uint32_t col);
 
 void select_row(uint32_t base_addr, uint32_t row);
 
-void set_feature(uint32_t base_addr, uint32_t feature);
+void nand_set_feature(uint32_t base_addr, uint32_t feature);
 
 void set_length(uint32_t base_addr, uint32_t length);
 
