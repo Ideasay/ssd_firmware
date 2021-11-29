@@ -10,6 +10,7 @@
         "nvme_transmitter.h": "c",
         "host_lld.h": "c",
         "request_format.h": "c",
-        "request_queue.h": "c"
+        "request_queue.h": "c",
+        "nsc_driver.h": "c"
     }
 }

@@ -12,8 +12,7 @@
  * 2 -> our new DMA
  * ********************/
 #define NVME_SIM        2
-#define XPAR_NANDFLASHCONTROLLER_1_BASEADDR
-#define XPAR_NANDFLASHCONTROLLER_0_BASEADDR
+#define PRINT           0
 //checks NSC connection, initializes base address
 #ifdef	XPAR_NANDFLASHCONTROLLER_1_BASEADDR
 #define NSC_1_CONNECTED	1

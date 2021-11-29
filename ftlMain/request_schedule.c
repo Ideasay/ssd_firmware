@@ -671,8 +671,8 @@ void IssueNandReq(unsigned int chNo, unsigned int wayNo)
 		dieStateTablePtr->dieState[chNo][wayNo].reqStatusCheckOpt = REQ_STATUS_CHECK_OPT_CHECK;
         readpage_00h_30h(base_addr,  wayNo +1 , 0x00000000, rowAddr, BYTES_PER_DATA_REGION_OF_PAGE, (uint32_t)dataBufAddr);
 		//V2FReadPageTriggerAsync(chCtlReg[chNo], wayNo, rowAddr);
-        if((databuffer_index==0)||(databuffer_index==1))
-        xil_printf("!!! read data from Ch%d flash(addr=0x%08x) to No.%d data buffer complete !!! \r\n",chNo, rowAddr, databuffer_index);
+       // if((databuffer_index==0)||(databuffer_index==1))
+        //xil_printf("!!! read data from Ch%d flash(addr=0x%08x) to No.%d data buffer complete !!! \r\n",chNo, rowAddr, databuffer_index);
 	}
 	//else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_READ_TRANSFER)
 	//{
@@ -699,6 +699,7 @@ void IssueNandReq(unsigned int chNo, unsigned int wayNo)
 		dieStateTablePtr->dieState[chNo][wayNo].reqStatusCheckOpt = REQ_STATUS_CHECK_OPT_CHECK;
 
         eraseblock_60h_d0h(base_addr, wayNo +1 , rowAddr);
+        xil_printf("!!! erase  Ch%d flash(addr=0x%08x) complete !!! \r\n", chNo,rowAddr);
 		//V2FEraseBlockAsync(chCtlReg[chNo], wayNo, rowAddr);
 	}
 	else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_RESET)

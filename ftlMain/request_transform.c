@@ -100,21 +100,21 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	nvmeDmaStartIndex = 0;
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
 	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
-	xil_printf("ReqTransNvmeToSlice here!\n\r");
-	xil_printf("startLba is 0x%x\n\r",startLba);
-	xil_printf("start_offset is 0x%x\n\r",start_offset);
-	xil_printf("prpNum is 0x%x\n\r",prpNum);
-	xil_printf("requestedNvmeBlock is 0x%x\n\r",requestedNvmeBlock);
-	xil_printf("loop is 0x%x\n\r",loop);
+	//xil_printf("ReqTransNvmeToSlice here!\n\r");
+	//xil_printf("startLba is 0x%x\n\r",startLba);
+	//xil_printf("start_offset is 0x%x\n\r",start_offset);
+	//xil_printf("prpNum is 0x%x\n\r",prpNum);
+	//xil_printf("requestedNvmeBlock is 0x%x\n\r",requestedNvmeBlock);
+	//xil_printf("loop is 0x%x\n\r",loop);
 	if(cmdCode == IO_NVM_WRITE)
 	{
 		reqCode = REQ_CODE_WRITE;
-		xil_printf("WRITE (to slice)!\n\r");
+		//xil_printf("WRITE (to slice)!\n\r");
 	}
 	else if(cmdCode == IO_NVM_READ)
 	{
 		reqCode = REQ_CODE_READ;
-		xil_printf("READ (to slice)!\n\r");
+		//xil_printf("READ (to slice)!\n\r");
 	}
 	else
 		assert(!"[WARNING] Not supported command code [WARNING]");
@@ -123,8 +123,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		prpCnt = 1;
 		prpCollectedForSlice[0] = prp1ForReq;
 		dataLengthForSlice[0] = LBA_SIZE - start_offset;
-		xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
-		xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
+		//xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
+		//xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
 	}
 	else if(prpNum == 2)
 	{
@@ -133,10 +133,10 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		prpCollectedForSlice[1] = prp2ForReq & (0-(1<<12));
 		dataLengthForSlice[0] = LBA_SIZE - start_offset;
 		dataLengthForSlice[1] = data_length - dataLengthForSlice[0];
-		xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
-		xil_printf("prpCollectedForSlice[1] is 0x%x!\n\r",prpCollectedForSlice[1]);
-		xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
-		xil_printf("dataLengthForSlice[1] is 0x%x!\n\r",dataLengthForSlice[1]);
+		//xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
+		//xil_printf("prpCollectedForSlice[1] is 0x%x!\n\r",prpCollectedForSlice[1]);
+		//xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
+		//xil_printf("dataLengthForSlice[1] is 0x%x!\n\r",dataLengthForSlice[1]);
 	}
 	else
 	{
@@ -363,7 +363,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		}
 	}
 	PutToSliceReqQ(reqSlotTag);
-	xil_printf("ReqTransNvmeToSlice end!\n\r");
+	//xil_printf("ReqTransNvmeToSlice end!\n\r");
 }
 
 
@@ -431,7 +431,7 @@ void DataReadFromNand(unsigned int originReqSlotTag)
 void ReqTransSliceToLowLevel()
 {
 	unsigned int reqSlotTag, dataBufEntry;
-	xil_printf("ReqTransSliceToLowLevel here!\n\r");
+	//xil_printf("ReqTransSliceToLowLevel here!\n\r");
 	while(sliceReqQ.headReq != REQ_SLOT_TAG_NONE)
 	{
 		reqSlotTag = GetFromSliceReqQ();

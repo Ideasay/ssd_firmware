@@ -217,9 +217,9 @@ void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
     xil_printf("!!! copy data to DDR data buffer No.%d complete !!! \r\n", databuffer_index);
     xil_printf("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
-    g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
-    g_hostDmaStatus.autoDmaRxCnt++;
+    //g_hostDmaStatus.fifoTail.autoDmaRx++;
+    //g_hostDmaStatus.autoDmaRxCnt++;
 }
 
 void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice,u64 offset)
@@ -230,9 +230,9 @@ void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
 	write_ioD_c2h_dsc(addr_total,(u64)databuffer_ptr,dataLengthForSlice);// unit is byte!
 	while((get_io_dma_status() & 0x4) == 0);
     xil_printf("!!! read data from DDR data buffer No.%d complete !!! \r\n", databuffer_index);
-    xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
+    //xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
-    g_hostDmaStatus.fifoTail.autoDmaRx++; 
-    g_hostDmaStatus.autoDmaTxCnt++;
+    //g_hostDmaStatus.fifoTail.autoDmaRx++;
+    //g_hostDmaStatus.autoDmaTxCnt++;
 }
 
