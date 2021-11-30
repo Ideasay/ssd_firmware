@@ -83,6 +83,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 {
 	unsigned int reqSlotTag, requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, tempLsa, loop, nvmeBlockOffset, nvmeDmaStartIndex, reqCode;
 	//new added for transforming req
+	unsigned int tempLastReqTag;
 	u64 prpCollectedForSlice[prpNum];
 	int dataLengthForSlice[prpNum];
 	int left_length;
@@ -252,7 +253,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		}
 	}
 	//for first transform, we should not enable cq submmit
-	reqPoolPtr->reqPool[reqSlotTag].cqEn = 0;
+	tempLastReqTag = reqSlotTag;
+	reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 	PutToSliceReqQ(reqSlotTag);
 
 	tempLsa++;
@@ -307,7 +309,9 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			    t++;
 			}
 		}
-		reqPoolPtr->reqPool[reqSlotTag].cqEn = 0;
+		reqPoolPtr->reqPool[tempLastReqTag].cqEn = 0;
+		tempLastReqTag = reqSlotTag;
+		reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 		PutToSliceReqQ(reqSlotTag);
 
 		tempLsa++;
@@ -320,8 +324,6 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	nvmeBlockOffset = 0;
 	tempNumOfNvmeBlock = (startLba + requestedNvmeBlock) % NVME_BLOCKS_PER_SLICE;
 	if((tempNumOfNvmeBlock == 0) || (loop == 0))
-		//last reqSlotTag is the last req for this nvme cmd
-		reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 		return ;
 
 	reqSlotTag = GetFromFreeReqQ();
@@ -365,6 +367,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		    t++;
 		}
 	}
+	reqPoolPtr->reqPool[tempLastReqTag].cqEn = 0;
+	tempLastReqTag = reqSlotTag;
 	reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 	PutToSliceReqQ(reqSlotTag);
 	//xil_printf("ReqTransNvmeToSlice end!\n\r");
