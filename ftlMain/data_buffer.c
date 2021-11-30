@@ -67,22 +67,18 @@ void Print_databuffer()
 void InitDataBuf()
 {
 	int bufEntry;
+
 	dataBufMapPtr = (P_DATA_BUF_MAP) DATA_BUFFER_MAP_ADDR;
 	dataBufHashTablePtr = (P_DATA_BUF_HASH_TABLE)DATA_BUFFFER_HASH_TABLE_ADDR;
 	tempDataBufMapPtr = (P_TEMPORARY_DATA_BUF_MAP)TEMPORARY_DATA_BUFFER_MAP_ADDR;
-
-
-	////xil_printf("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
 
 	for(bufEntry = 0; bufEntry < AVAILABLE_DATA_BUFFER_ENTRY_COUNT; bufEntry++)
 	{
 		dataBufMapPtr->dataBuf[bufEntry].logicalSliceAddr = LSA_NONE;
 		dataBufMapPtr->dataBuf[bufEntry].prevEntry = bufEntry-1;
 		dataBufMapPtr->dataBuf[bufEntry].nextEntry = bufEntry+1;
-
-		////xil_printf("bufEntry is 0x%x\n", bufEntry);
-		////xil_printf("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
-
+		//xil_printf("bufEntry is 0x%x\n", bufEntry);
+		//xil_printf("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
 		dataBufMapPtr->dataBuf[bufEntry].dirty = DATA_BUF_CLEAN;
 		dataBufMapPtr->dataBuf[bufEntry].blockingReqTail =  REQ_SLOT_TAG_NONE;
 
@@ -99,7 +95,7 @@ void InitDataBuf()
 	//xil_printf("InitDataBuf : dataBufLruList.tailEntry is 0x%x!\n\r", dataBufLruList.tailEntry);
 	for(bufEntry = 0; bufEntry < AVAILABLE_TEMPORARY_DATA_BUFFER_ENTRY_COUNT; bufEntry++)
 		tempDataBufMapPtr->tempDataBuf[bufEntry].blockingReqTail =  REQ_SLOT_TAG_NONE;
-	//Print_databuffer();
+	Print_databuffer();
 }
 
 unsigned int CheckDataBufHit(unsigned int reqSlotTag)
@@ -156,7 +152,7 @@ unsigned int CheckDataBufHit(unsigned int reqSlotTag)
 				dataBufLruList.tailEntry = bufEntry;
 			}
 			//xil_printf("new data buffer list is:\n");
-			//Print_databuffer();
+			Print_databuffer();
 			return bufEntry;
 		}
 		else
@@ -197,7 +193,7 @@ unsigned int AllocateDataBuf()
 	SelectiveGetFromDataBufHashList(evictedEntry);
 	//xil_printf("dataBufLruList.headEntry is 0x%x!\n\r",dataBufLruList.headEntry);
 	//xil_printf("dataBufLruList.tailEntry is 0x%x!\n\r",dataBufLruList.tailEntry);
-	//Print_databuffer();
+	Print_databuffer();
 	//xil_printf("AllocateDataBuf return!\n\r");
 	return evictedEntry;
 }

@@ -98,66 +98,18 @@ int main()
 {	
 	//init platform
     init_platform();
-    xil_printf("======NVMe Test Start========\n\r");
+    ////xil_printf("======NVMe Test Start========\n\r");
     Xil_DCacheDisable();
 	Xil_ICacheDisable();
 	//init FTL & clear whole disk
-	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
+	////xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 
-    if(PRINT)
-    {
-    	xil_printf("MEMORY_SEGMENTS_START_ADDR is 0x%x\n", MEMORY_SEGMENTS_START_ADDR);
-    	xil_printf("MEMORY_SEGMENTS_END_ADDR is 0x%x\n", MEMORY_SEGMENTS_END_ADDR);
-    	xil_printf("NVME_MANAGEMENT_START_ADDR is 0x%x\n", NVME_MANAGEMENT_START_ADDR);
-    	xil_printf("NVME_MANAGEMENT_END_ADDR is 0x%x\n", NVME_MANAGEMENT_END_ADDR);
-    	xil_printf("RESERVED0_START_ADDR is 0x%x\n", RESERVED0_START_ADDR);
-    	xil_printf("RESERVED0_END_ADDR is 0x%x\n", RESERVED0_END_ADDR);
-    	xil_printf("FTL_MANAGEMENT_START_ADDR is 0x%x\n", FTL_MANAGEMENT_START_ADDR);
-    	xil_printf("DATA_BUFFER_BASE_ADDR is 0x%x\n", DATA_BUFFER_BASE_ADDR);
-    	xil_printf("TEMPORARY_DATA_BUFFER_BASE_ADDR is 0x%x\n", TEMPORARY_DATA_BUFFER_BASE_ADDR);
-    	xil_printf("SPARE_DATA_BUFFER_BASE_ADDR is 0x%x\n", SPARE_DATA_BUFFER_BASE_ADDR);
-    	xil_printf("TEMPORARY_SPARE_DATA_BUFFER_BASE_ADDR is 0x%x\n", TEMPORARY_SPARE_DATA_BUFFER_BASE_ADDR);
-    	xil_printf("RESERVED_DATA_BUFFER_BASE_ADDR is 0x%x\n", RESERVED_DATA_BUFFER_BASE_ADDR);
-    	xil_printf("COMPLETE_FLAG_TABLE_ADDR is 0x%x\n", COMPLETE_FLAG_TABLE_ADDR);
-    	xil_printf("STATUS_REPORT_TABLE_ADDR is 0x%x\n", STATUS_REPORT_TABLE_ADDR);
-    	xil_printf("ERROR_INFO_TABLE_ADDR is 0x%x\n", ERROR_INFO_TABLE_ADDR);
-    	xil_printf("TEMPORARY_PAY_LOAD_ADDR is 0x%x\n", TEMPORARY_PAY_LOAD_ADDR);
-    	xil_printf("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
-    	xil_printf("DATA_BUFFFER_HASH_TABLE_ADDR is 0x%x\n", DATA_BUFFFER_HASH_TABLE_ADDR);
-    	xil_printf("TEMPORARY_DATA_BUFFER_MAP_ADDR is 0x%x\n", TEMPORARY_DATA_BUFFER_MAP_ADDR);
-    	xil_printf("LOGICAL_SLICE_MAP_ADDR is 0x%x\n", LOGICAL_SLICE_MAP_ADDR);
-		xil_printf("VIRTUAL_SLICE_MAP_ADDR is 0x%x\n", VIRTUAL_SLICE_MAP_ADDR);
-		xil_printf("VIRTUAL_BLOCK_MAP_ADDR is 0x%x\n", VIRTUAL_BLOCK_MAP_ADDR);
-		xil_printf("PHY_BLOCK_MAP_ADDR is 0x%x\n", PHY_BLOCK_MAP_ADDR);
-		xil_printf("BAD_BLOCK_TABLE_INFO_MAP_ADDR is 0x%x\n", BAD_BLOCK_TABLE_INFO_MAP_ADDR);
-		xil_printf("VIRTUAL_DIE_MAP_ADDR is 0x%x\n", VIRTUAL_DIE_MAP_ADDR);
-		xil_printf("GC_VICTIM_MAP_ADDR is 0x%x\n", GC_VICTIM_MAP_ADDR);
-		xil_printf("REQ_POOL_ADDR is 0x%x\n", REQ_POOL_ADDR);
-		xil_printf("ROW_ADDR_DEPENDENCY_TABLE_ADDR is 0x%x\n", ROW_ADDR_DEPENDENCY_TABLE_ADDR);
-		xil_printf("DIE_STATE_TABLE_ADDR is 0x%x\n", DIE_STATE_TABLE_ADDR);
-		xil_printf("RETRY_LIMIT_TABLE_ADDR is 0x%x\n", RETRY_LIMIT_TABLE_ADDR);
-		xil_printf("WAY_PRIORITY_TABLE_ADDR is 0x%x\n", WAY_PRIORITY_TABLE_ADDR);
-		xil_printf("FTL_MANAGEMENT_END_ADDR is 0x%x\n", FTL_MANAGEMENT_END_ADDR);
-		xil_printf("NVME_REQ_SIM_ADDR is 0x%x\n", NVME_REQ_SIM_ADDR);
-		xil_printf("NVME_DATA_SIM_ADDR is 0x%x\n", NVME_DATA_SIM_ADDR);
-
-		xil_printf("PL_SQ_DATA_BUF_BASEADDR is 0x%x\n", PL_SQ_DATA_BUF_BASEADDR);
-		xil_printf("PL_CQ_DATA_BUF_BASEADDR is 0x%x\n", PL_CQ_DATA_BUF_BASEADDR);
-		xil_printf("PL_IO_READ_BUF_BASEADDR is 0x%x\n", PL_IO_READ_BUF_BASEADDR);
-		xil_printf("PL_IO_WRITE_BUF_BASEADDR is 0x%x\n", PL_IO_WRITE_BUF_BASEADDR);
-		xil_printf("PL_IO_PRP_BUF_BASEADDR is 0x%x\n", PL_IO_PRP_BUF_BASEADDR);
-		xil_printf("PL_IO_END is 0x%x\n", PL_IO_END);
-
-		xil_printf("RESERVED1_START_ADDR is 0x%x\n", RESERVED1_START_ADDR);
-		xil_printf("RESERVED1_END_ADDR is 0x%x\n", RESERVED1_END_ADDR);
-		xil_printf("DRAM_END_ADDR is 0x%x\n", DRAM_END_ADDR);
-    }
 	InitFTL();
 
-	xil_printf("\r\nFTL reset complete!!! \r\n");
+	////xil_printf("\r\nFTL reset complete!!! \r\n");
     eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f800);
     eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f800);
-    xil_printf("erase two channels(addr 0x7f800) complete! \r\n");
+    ////xil_printf("erase two channels(addr 0x7f800) complete! \r\n");
     xil_printf("Configure NVMe here! \r\n");
 	// Paging table set
 	#define MB (1024*1024)
@@ -191,7 +143,7 @@ int main()
 				{
 					state = NVME_STATE_ENABLED;
 					//g_nvmeTask.status = state;
-					xil_printf("NVMe Reg CC_EN is set\n\r");
+					////xil_printf("NVMe Reg CC_EN is set\n\r");
 				}
 				break;
 				//not break, just fall through
@@ -205,7 +157,7 @@ int main()
 				init_nvme_controller(0);
 				set_csts_rdy(1);
      			//xdma_msix_vector_print();
-				xil_printf("PS Set CSTS RDY \n\r");
+				////xil_printf("PS Set CSTS RDY \n\r");
 				break;
 				//not break, just fall through
 			}
@@ -218,7 +170,7 @@ int main()
 					//g_nvmeTask.status = state;
 					init_nvme_controller(1);
 					set_csts_rdy(0);
-					xil_printf("Controller Reset \n\r");
+					////xil_printf("Controller Reset \n\r");
 				}
 				else if(get_reg_cc_shn())
 				{
@@ -226,7 +178,7 @@ int main()
 					//g_nvmeTask.status = state;
 					//init_nvme_controller(1);
 					set_csts_shst(2);
-					xil_printf("Controller Shutdown \n\r");
+					////xil_printf("Controller Shutdown \n\r");
 				}
 				else
 				{
@@ -249,7 +201,7 @@ int main()
 					//g_nvmeTask.status = state;
 					set_csts_shst(0);
 					set_csts_rdy(0);
-					xil_printf("Controller Restart \n\r");
+					////xil_printf("Controller Restart \n\r");
 				}
 				break;
 			}
@@ -258,7 +210,7 @@ int main()
 				state = NVME_STATE_DISABLED;
 				//g_nvmeTask.status = state;
 			}
-			//xil_printf("======NVMe Test End========\n\r");
+			//////xil_printf("======NVMe Test End========\n\r");
 		}//switch
 		//notCompletedNandReqCnt  blockedReqCnt:extern variates in req_allocation.c
 		if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
@@ -268,7 +220,7 @@ int main()
 		}
 
 	}//while
-	xil_printf("======NVMe Test End========\n\r");
+	////xil_printf("======NVMe Test End========\n\r");
 	cleanup_platform();
 	return 0;
 }//main

@@ -48,12 +48,12 @@ void write_h2c_dsc(u64 base_addr,u64 dst_addr,u32 len)
 void write_c2h_dsc(u64 base_addr,u64 src_addr,u32 len)
 {
 	set_acq_dsc_src_addr(src_addr);
-	//xil_printf("L_src_addr is %x!\n",src_addr);
-	//xil_printf("H_src_addr is %x!\n",src_addr>>32);
+	////xil_printf("L_src_addr is %x!\n",src_addr);
+	////xil_printf("H_src_addr is %x!\n",src_addr>>32);
 	set_acq_dsc_addr(base_addr);
-	//xil_printf("base_addr is %x!\n",base_addr);
+	////xil_printf("base_addr is %x!\n",base_addr);
 	set_acq_dsc_len(len);
-	//xil_printf("len is %x!\n",len);
+	////xil_printf("len is %x!\n",len);
 	set_acq_dsc_ctl(1);
 	set_acq_dsc_ctl(0);
 }
@@ -80,10 +80,10 @@ void write_ioD_c2h_dsc(u64 base_addr,u64 src_addr,u32 len)
 {
 
 
-	////xil_printf("L_src_addr is %x!\n",src_addr);
-	////xil_printf("H_src_addr is %x!\n",src_addr>>32);
-	////xil_printf("base_addr is %x!\n",base_addr);
-	////xil_printf("len is %x!\n",len);
+	//////xil_printf("L_src_addr is %x!\n",src_addr);
+	//////xil_printf("H_src_addr is %x!\n",src_addr>>32);
+	//////xil_printf("base_addr is %x!\n",base_addr);
+	//////xil_printf("len is %x!\n",len);
 
 	set_ioc2hD_dsc_src_addr(src_addr);
 	set_ioc2hD_dsc_addr(base_addr);
@@ -100,13 +100,13 @@ u32 nvme_read_sq_entry(nvme_sq_entry_t* sq_entry)
 	u32 i;
 	u32 rd_data;
 	if(sq_buf_wptr != g_sq_buf_rptr){
-		////xil_printf("sq_buf_wptr: %x\n\r", sq_buf_wptr);
+		//////xil_printf("sq_buf_wptr: %x\n\r", sq_buf_wptr);
 		//mem_read((PL_SQ_ENTRY_BUF_BASEADDR + g_sq_buf_rptr * NVME_SQ_ENTRY_SIZE), (void *)sq_entry, NVME_SQ_ENTRY_SIZE);
 
 		for(i=0; i<16;i++)
 		{
 			rd_data=Xil_In32(PL_SQ_ENTRY_BUF_BASEADDR+g_sq_buf_rptr* NVME_SQ_ENTRY_SIZE+i*4);
-			////xil_printf("Read [%d]: %x\n\r", i,rd_data);
+			//////xil_printf("Read [%d]: %x\n\r", i,rd_data);
 			sq_entry->dw[i]=rd_data;
 		}
 		if(g_sq_buf_rptr < (PL_SQ_ENTRY_NUM - 1))
@@ -125,13 +125,13 @@ u32 nvme_read_io_sq_entry(nvme_sq_entry_t* sq_entry)
 	u32 i;
 	u32 rd_data;
 	if(io_sq_buf_wptr != g_io_sq_buf_rptr){
-		////xil_printf("io_sq_buf_wptr: %x\n\r", io_sq_buf_wptr);
+		//////xil_printf("io_sq_buf_wptr: %x\n\r", io_sq_buf_wptr);
 		//mem_read((PL_SQ_ENTRY_BUF_BASEADDR + g_sq_buf_rptr * NVME_SQ_ENTRY_SIZE), (void *)sq_entry, NVME_SQ_ENTRY_SIZE);
 
 		for(i=0; i<16;i++)
 		{
 			rd_data=Xil_In32(PL_SQ_ENTRY_BUF_BASEADDR+g_io_sq_buf_rptr* NVME_SQ_ENTRY_SIZE+i*4+1024);//1024 is the bias addr for io sq bram
-			////xil_printf("Read [%d]: %x\n\r", i,rd_data);
+			//////xil_printf("Read [%d]: %x\n\r", i,rd_data);
 			sq_entry->dw[i]=rd_data;
 		}
 		if(g_io_sq_buf_rptr < (PL_SQ_ENTRY_NUM - 1))
@@ -150,14 +150,14 @@ u32 nvme_write_cq_entry(nvme_cq_entry_t* cq_entry)
 {
 	u32 cq_buf_rptr = get_acq_buf_rptr();
 	u32 i;
-//	////xil_printf("cq_buf_rptr: %x\n\r", cq_buf_rptr);
+//	//////xil_printf("cq_buf_rptr: %x\n\r", cq_buf_rptr);
 	if((cq_buf_rptr == (g_cq_buf_wptr + 1)) || ((cq_buf_rptr == 0) && (g_cq_buf_wptr == PL_CQ_ENTRY_NUM - 1))){
 		return FALSE;
 	} else{
 		//mem_write((PL_CQ_ENTRY_BUF_BASEADDR + g_cq_buf_wptr * NVME_CQ_ENTRY_SIZE), (void *)cq_entry, NVME_CQ_ENTRY_SIZE);
 		for(i=0;i<4;i++)
 		{
-			//xil_printf("Write [%d]: %x\n\r", i,cq_entry->dw[i]);
+			////xil_printf("Write [%d]: %x\n\r", i,cq_entry->dw[i]);
 			Xil_Out32(PL_CQ_ENTRY_BUF_BASEADDR + g_cq_buf_wptr * NVME_CQ_ENTRY_SIZE+i*4, cq_entry->dw[i]);
 		}
 
@@ -174,14 +174,14 @@ u32 nvme_write_io_cq_entry(nvme_cq_entry_t* cq_entry)
 {
 	u32 cq_buf_rptr = get_io0_cq_buf_rptr();
 	u32 i;
-//	////xil_printf("cq_buf_rptr: %x\n\r", cq_buf_rptr);
+//	//////xil_printf("cq_buf_rptr: %x\n\r", cq_buf_rptr);
 	if((cq_buf_rptr == (g_io_cq_buf_wptr + 1)) || ((cq_buf_rptr == 0) && (g_io_cq_buf_wptr == PL_CQ_ENTRY_NUM - 1))){
 		return FALSE;
 	} else{
 		//mem_write((PL_CQ_ENTRY_BUF_BASEADDR + g_cq_buf_wptr * NVME_CQ_ENTRY_SIZE), (void *)cq_entry, NVME_CQ_ENTRY_SIZE);
 		for(i=0;i<4;i++)
 		{
-			////xil_printf("Write [%d]: %x\n\r", i,cq_entry->dw[i]);
+			//////xil_printf("Write [%d]: %x\n\r", i,cq_entry->dw[i]);
 			Xil_Out32(PL_CQ_ENTRY_BUF_BASEADDR + g_io_cq_buf_wptr * NVME_CQ_ENTRY_SIZE+i*4+1024, cq_entry->dw[i]);
 		}
 
@@ -217,10 +217,10 @@ u32 nvme_write_cq_data(u64 dsc_base_addr, u32* buf, u32 size)
 		write_c2h_dsc(dsc_base_addr, PL_CQ_DATA_BUF_BASEADDR,size);
 		while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
 		return TRUE;
-		////xil_printf("write cq data ture!\n\r");
+		//////xil_printf("write cq data ture!\n\r");
 	} else {
 		return FALSE;
-		////xil_printf("write cq data false!\n\r");
+		//////xil_printf("write cq data false!\n\r");
 	}
 }
 

@@ -37,7 +37,7 @@ void create_io_sq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	u8 psdt = sq_entry->psdt;
 	u64 qbase_addr = sq_entry->prp1;
 
-	////xil_printf("Admin Command(Create IO SQ), cid: %d, nsid: %d, sq_id: %d, cq_id: %d, qsize: %d\n\r", cid, sq_entry->nsid, sq_id, cq_id, qsize);
+	//////xil_printf("Admin Command(Create IO SQ), cid: %d, nsid: %d, sq_id: %d, cq_id: %d, qsize: %d\n\r", cid, sq_entry->nsid, sq_id, cq_id, qsize);
 
 	u32 sq_index;
 	sq_attribute_t sq_attribute;
@@ -67,7 +67,7 @@ void create_io_sq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		//set_sq_reset(g_sq_reset);
 		set_sq_base_addr(sq_index, qbase_addr);
 		set_sq_size_id(sq_index, qsize + 1, sq_id);
-		////xil_printf("Succeed! qbase_addr: 0x%lx\n\r", qbase_addr);
+		//////xil_printf("Succeed! qbase_addr: 0x%lx\n\r", qbase_addr);
 	}
 }
 
@@ -87,7 +87,7 @@ void create_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	u8 psdt = sq_entry->psdt;
 	u64 qbase_addr = sq_entry->prp1;
 
-	//xil_printf("Admin Command(Create IO CQ), cid: %d, nsid: %d, cq_id: %d, qsize: %d\n\r", cid, sq_entry->nsid, cq_id, qsize);
+	////xil_printf("Admin Command(Create IO CQ), cid: %d, nsid: %d, cq_id: %d, qsize: %d\n\r", cid, sq_entry->nsid, cq_id, qsize);
 
 	u32 cq_index;
 	cq_attribute_t cq_attribute;
@@ -119,7 +119,7 @@ void create_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 		set_cq_base_addr(cq_index, qbase_addr);
 		set_cq_size_id(cq_index, qsize + 1, cq_id);
-//		//xil_printf("g_iocq_irq_enable:0x%x\n\r", g_iocq_irq_enable);
+//		////xil_printf("g_iocq_irq_enable:0x%x\n\r", g_iocq_irq_enable);
 		if(irq_en){
 			xdma_usr_irq_vector_set(cq_index+1, irq_vector);
 			g_iocq_irq_enable = g_iocq_irq_enable | (1<<cq_index);
@@ -128,8 +128,8 @@ void create_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		else{
 			g_iocq_irq_enable = g_iocq_irq_enable & (~(1<<cq_index));
 		}
-		//xil_printf("Succeed! g_iocq_irq_enable: 0x%x, irq_en: 0x%x, irq_vector: 0x%x\n\r", g_iocq_irq_enable, irq_en, irq_vector);
-//		//xil_printf("Succeed! qbase_addr: 0x%lX, irq_en: 0x%x, irq_vector: 0x%x\n\r", qbase_addr, irq_en, irq_vector);
+		////xil_printf("Succeed! g_iocq_irq_enable: 0x%x, irq_en: 0x%x, irq_vector: 0x%x\n\r", g_iocq_irq_enable, irq_en, irq_vector);
+//		////xil_printf("Succeed! qbase_addr: 0x%lX, irq_en: 0x%x, irq_vector: 0x%x\n\r", qbase_addr, irq_en, irq_vector);
 	}
 }
 
@@ -139,7 +139,7 @@ void delete_io_sq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	nvme_sq_delete_io_que_dw10_t* sq_entry_dw10 = (nvme_sq_delete_io_que_dw10_t*)(&sq_entry->dw[10]);
 	u16 cid = sq_entry->cid;
 	u16 sq_id = sq_entry_dw10->qid;
-	//xil_printf("Admin Command(Delete IO SQ), cid: %d, nsid: %d, qid: %d\n\r", cid, sq_entry->nsid, sq_id);
+	////xil_printf("Admin Command(Delete IO SQ), cid: %d, nsid: %d, qid: %d\n\r", cid, sq_entry->nsid, sq_id);
 	u32 sq_index;
 //	memset(cq_entry, 0, NVME_CQ_ENTRY_SIZE);
 	cq_entry->cid = cid;
@@ -153,7 +153,7 @@ void delete_io_sq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		//set_sq_reset(g_sq_reset);
 		set_sq_base_addr(sq_index, 0);
 		set_sq_size_id(sq_index, 0, 0);
-		//xil_printf("Succeed!\n\r");
+		////xil_printf("Succeed!\n\r");
 	}
 }
 
@@ -163,7 +163,7 @@ void delete_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	nvme_sq_delete_io_que_dw10_t* sq_entry_dw10 = (nvme_sq_delete_io_que_dw10_t*)(&sq_entry->dw[10]);
 	u16 cid = sq_entry->cid;
 	u16 cq_id = sq_entry_dw10->qid;
-	//xil_printf("Admin Command(Delete IO CQ), cid: %d, nsid: %d, qid: %d\n\r", cid, sq_entry->nsid, cq_id);
+	////xil_printf("Admin Command(Delete IO CQ), cid: %d, nsid: %d, qid: %d\n\r", cid, sq_entry->nsid, cq_id);
 
 	u32 cq_index;
 //	memset(cq_entry, 0, NVME_CQ_ENTRY_SIZE);
@@ -184,7 +184,7 @@ void delete_io_cq(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		g_iocq_irq_enable = g_iocq_irq_enable & (~(1<<cq_index));
 		set_iocq_irq_enable(g_iocq_irq_enable);
 //		xdma_usr_irq_vector_set(cq_index, 0);
-		//xil_printf("Succeed!\n\r");
+		////xil_printf("Succeed!\n\r");
 	}
 }
 
@@ -207,7 +207,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 //	u32 log_page_offset_h = sq_entry->dw[13];
 //	u64 offset = ((u64)log_page_offset_h << 32) | log_page_offset_l;
 
-	//xil_printf("Admin Command(Get Log Page), cid: %d, nsid: %d, lid = %d\n\r", cid, sq_entry->nsid, sq_entry_dw10.lid);
+	////xil_printf("Admin Command(Get Log Page), cid: %d, nsid: %d, lid = %d\n\r", cid, sq_entry->nsid, sq_entry_dw10.lid);
 
 	u32* buf = (u32*)BRAM_BUF_BASEADDR;
 	u32 byte_len = 512;
@@ -241,7 +241,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 			default:
 			{
 				data_valid = 0;
-//				//xil_printf("Unsupported LID!\n\r");
+//				////xil_printf("Unsupported LID!\n\r");
 			}
 		}
 		if(data_valid == 0){
@@ -253,7 +253,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		} else {
 			cq_entry->sct = 0;
 			cq_entry->sc = 0;
-			//xil_printf("Succeed!\n\r");
+			////xil_printf("Succeed!\n\r");
 		}
 	}
 }
@@ -629,7 +629,7 @@ void identify(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	u8 psdt = sq_entry->psdt;
 	u64 host_base_addr = sq_entry->prp1;
 
-	//xil_printf("Admin Command(Identify), cid: %d, nsid: %d, cns: 0x%X\n\r", cid, nsid, sq_entry_dw10.cns);
+	////xil_printf("Admin Command(Identify), cid: %d, nsid: %d, cns: 0x%X\n\r", cid, nsid, sq_entry_dw10.cns);
 
 	u32* buf = (u32*)BRAM_BUF_BASEADDR;
 	u32 byte_len = 4096;
@@ -681,7 +681,7 @@ void identify(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 			}
 			default:
 			{
-				//xil_printf("Unsupported Identify CNS Value!\n\r");
+				////xil_printf("Unsupported Identify CNS Value!\n\r");
 				data_valid = 0;
 				cq_entry->sct = 0;
 				cq_entry->sc = 2;  // invalid field: unsupported CNS value
@@ -690,12 +690,12 @@ void identify(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		if(data_valid && (nvme_write_cq_data(host_base_addr, buf, byte_len) == FALSE)){
 			cq_entry->sct = 0;
 			cq_entry->sc = 4; // DATA transfer error
-			//xil_printf("FALSE!\n\r");
-			//xil_printf("data_valid is %x!\n",&data_valid);
+			////xil_printf("FALSE!\n\r");
+			////xil_printf("data_valid is %x!\n",&data_valid);
 		} else if(data_valid) {
 			cq_entry->sct = 0;
 			cq_entry->sc = 0;
-			//xil_printf("Succeed!\n\r");
+			////xil_printf("Succeed!\n\r");
 		}
 	}
 }
@@ -707,38 +707,38 @@ void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	sq_entry_dw10.dw = sq_entry->dw[10];
 	u16 cid = sq_entry->cid;
 
-	//xil_printf("Admin Command(Set Feature), cid: %d, nsid: 0%d, fid: 0x%X\n\r", cid, sq_entry->nsid, sq_entry_dw10.fid);
+	////xil_printf("Admin Command(Set Feature), cid: %d, nsid: 0%d, fid: 0x%X\n\r", cid, sq_entry->nsid, sq_entry_dw10.fid);
 
 	cq_entry->cid = cid;
 	switch (sq_entry_dw10.fid)
 	{
 		case NVME_FEATURE_ID_ARBITRATION:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ARBITRATION\n\r");
+//			////xil_printf("NVME_FEATURE_ID_ARBITRATION\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_POWER_MANAGEMENT:
 		{
-//			//xil_printf("NVME_FEATURE_ID_POWER_MANAGEMENT\n\r");
+//			////xil_printf("NVME_FEATURE_ID_POWER_MANAGEMENT\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_TEMPERATURE_THRESHOLD:
 		{
-//			//xil_printf("NVME_FEATURE_ID_TEMPERATURE_THRESHOLD\n\r");
+//			////xil_printf("NVME_FEATURE_ID_TEMPERATURE_THRESHOLD\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_ERROR_RECOVERY:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ERROR_RECOVERY\n\r");
+//			////xil_printf("NVME_FEATURE_ID_ERROR_RECOVERY\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_NUMBER_OF_QUEUE:
 		{
-//			//xil_printf("NVME_FEATURE_ID_NUMBER_OF_QUEUE\n\r");
+//			////xil_printf("NVME_FEATURE_ID_NUMBER_OF_QUEUE\n\r");
 			nvme_sq_set_features_number_of_queues_dw11_t sq_entry_dw11;
 			sq_entry_dw11.dw = sq_entry->dw[11];
 			u16 sq_allocated = MIN(sq_entry_dw11.nsqr, NVME_IO_SQ_NUM - 1);
@@ -749,32 +749,32 @@ void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 //			sq_entry_dw11.ncqr = NVME_IO_CQ_NUM - 1;
 
 			cq_entry->command_specific = sq_entry_dw11.dw;
-//			//xil_printf("Admin Command(NVME_FEATURE_ID_NUMBER_OF_QUEUE), sq_entry_dw11: 0x%X\n\r", sq_entry_dw11.dw);
+//			////xil_printf("Admin Command(NVME_FEATURE_ID_NUMBER_OF_QUEUE), sq_entry_dw11: 0x%X\n\r", sq_entry_dw11.dw);
 
 			break;
 		}
 		case NVME_FEATURE_ID_INTERRUPT_COALESCING:
 		{
-//			//xil_printf("NVME_FEATURE_ID_INTERRUPT_COALESCING\n\r");
+//			////xil_printf("NVME_FEATURE_ID_INTERRUPT_COALESCING\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG:
 		{
-//			//xil_printf("NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG\n\r");
+//			////xil_printf("NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL:
 		{
-//			//xil_printf("NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL\n\r");
+//			////xil_printf("NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG\n\r");
-			//xil_printf("Admin Command(NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG), sq_entry_dw11: 0x%X\n\r", sq_entry->dw[11]);
+//			////xil_printf("NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG\n\r");
+			////xil_printf("Admin Command(NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG), sq_entry_dw11: 0x%X\n\r", sq_entry->dw[11]);
 
 			break;
 		}
@@ -783,15 +783,15 @@ void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 //			nvme_sq_set_features_auto_power_state_transition_dw11_t sq_entry_dw11;;
 //			sq_entry_dw11.dw = sq_entry->dw[11];
 //			if(sq_entry_dw11.apste == 1)
-//				//xil_printf("Auto power state transition enable\n\r");
+//				////xil_printf("Auto power state transition enable\n\r");
 //			else
-//				//xil_printf("Auto power state transition disable\n\r");
+//				////xil_printf("Auto power state transition disable\n\r");
 
 			break;
 		}
 		default:
 		{
-			//xil_printf("Unsupported Set Feature FID!\n\r");
+			////xil_printf("Unsupported Set Feature FID!\n\r");
 			cq_entry->sct = 0;
 			cq_entry->sc = 2;  // invalid field: unsupported FID value
 		}
@@ -805,13 +805,13 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	sq_entry_dw10.dw = sq_entry->dw[10];
 	u16 cid = sq_entry->cid;
 
-	//xil_printf("Admin Command(Get Feature), cid: %d, nsid: %d, fid: 0x%X\n\r", cid, sq_entry->nsid, sq_entry_dw10.fid);
+	////xil_printf("Admin Command(Get Feature), cid: %d, nsid: %d, fid: 0x%X\n\r", cid, sq_entry->nsid, sq_entry_dw10.fid);
 	cq_entry->cid = cid;
 	switch (sq_entry_dw10.fid)
 	{
 		case NVME_FEATURE_ID_ARBITRATION:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ARBITRATION\n\r");
+//			////xil_printf("NVME_FEATURE_ID_ARBITRATION\n\r");
 			nvme_sq_set_features_arbitration_dw11_t sq_entry_dw11;
 			sq_entry_dw11.ab = 7;
 			sq_entry_dw11.reserved0 = 0;
@@ -823,7 +823,7 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		case NVME_FEATURE_ID_POWER_MANAGEMENT:
 		{
-//			//xil_printf("NVME_FEATURE_ID_POWER_MANAGEMENT\n\r");
+//			////xil_printf("NVME_FEATURE_ID_POWER_MANAGEMENT\n\r");
 			nvme_sq_set_features_power_management_dw11_t sq_entry_dw11;
 			sq_entry_dw11.dw = 0;
 			sq_entry_dw11.ps = 0;
@@ -833,13 +833,13 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		case NVME_FEATURE_ID_TEMPERATURE_THRESHOLD:
 		{
-//			//xil_printf("NVME_FEATURE_ID_TEMPERATURE_THRESHOLD\n\r");
+//			////xil_printf("NVME_FEATURE_ID_TEMPERATURE_THRESHOLD\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_ERROR_RECOVERY:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ERROR_RECOVERY\n\r");
+//			////xil_printf("NVME_FEATURE_ID_ERROR_RECOVERY\n\r");
 
 			break;
 		}
@@ -855,31 +855,31 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		case NVME_FEATURE_ID_INTERRUPT_COALESCING:
 		{
-//			//xil_printf("NVME_FEATURE_ID_INTERRUPT_COALESCING\n\r");
+//			////xil_printf("NVME_FEATURE_ID_INTERRUPT_COALESCING\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG:
 		{
-//			//xil_printf("NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG\n\r");
+//			////xil_printf("NVME_FEATURE_ID_INTERRUPT_VECTOR_CONFIG\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL:
 		{
-//			//xil_printf("NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL\n\r");
+//			////xil_printf("NVME_FEATURE_ID_WRITE_ATOMICITY_NORMAL\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG:
 		{
-//			//xil_printf("NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG\n\r");
+//			////xil_printf("NVME_FEATURE_ID_ASYNCHRONOUS_EVENT_CONFIG\n\r");
 
 			break;
 		}
 		case NVME_FEATURE_ID_AUTO_POWER_STATE_TRANSITION:
 		{
-//			//xil_printf("NVME_FEATURE_ID_AUTO_POWER_STATE_TRANSITION\n\r");
+//			////xil_printf("NVME_FEATURE_ID_AUTO_POWER_STATE_TRANSITION\n\r");
 			nvme_sq_set_features_auto_power_state_transition_dw11_t sq_entry_dw11;;
 			sq_entry_dw11.dw = 0;
 			sq_entry_dw11.apste = 0;
@@ -895,7 +895,7 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		default:
 		{
-			//xil_printf("Unsupported Get Feature FID!\n\r");
+			////xil_printf("Unsupported Get Feature FID!\n\r");
 			cq_entry->sct = 0;
 			cq_entry->sc = 2;  // invalid field: unsupported FID value
 		}
@@ -906,14 +906,14 @@ void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 void async_event_req(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 {
-	//xil_printf("Admin Command(Asynchronous Event Request)\n\r");
+	////xil_printf("Admin Command(Asynchronous Event Request)\n\r");
 	cq_entry->cid = sq_entry->cid;
 }
 
 
 void cmd_abort(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 {
-	//xil_printf("Admin Command(Abort)\n\r");
+	////xil_printf("Admin Command(Abort)\n\r");
 	cq_entry->cid = sq_entry->cid;
 	cq_entry->command_specific = 0x1;
 }

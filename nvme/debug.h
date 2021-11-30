@@ -11,7 +11,7 @@
 if (!(X))																\
 {																		\
 	xil_printf("\r\n\nerror in %s: Line %d\r\n", __FILE__, __LINE__);	\
-	while(1) ;															\
+	while(1);															\
 }
 #else
 #define ASSERT(X)

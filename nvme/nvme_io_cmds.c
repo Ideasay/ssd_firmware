@@ -80,24 +80,23 @@ int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry,unsigned
 		}
 		case IO_NVM_WRITE:
 		{
-			//xil_printf("IO Write Command\r\n");
+			////xil_printf("IO Write Command\r\n");
 			handle_nvme_io_write(cmdSlotTag, sq_entry);
 
 			break;
 			}
 		case IO_NVM_READ:
 		{
-			//xil_printf("IO Read Command\r\n");
+			////xil_printf("IO Read Command\r\n");
 			handle_nvme_io_read(cmdSlotTag, sq_entry);
 			break;
 		}
 		default:
 		{
-			//xil_printf("Not Support IO Command OPC: %X\r\n", sq_entry->opc);
+			////xil_printf("Not Support IO Command OPC: %X\r\n", sq_entry->opc);
 			ASSERT(0);
 			break;
 		}
 	}
 	return need_cqe;
-
 }

@@ -108,7 +108,7 @@ void RemapBadBlock()
 	unsigned int reservedBlockOfLun0[USER_DIES];
 	unsigned int badBlockCount[USER_DIES];
 
-	xil_printf("Bad block remapping start...\r\n");
+	//xil_printf("Bad block remapping start...\r\n");
 
 	for(dieNo=0 ; dieNo<USER_DIES ; dieNo++)
 	{
@@ -123,7 +123,7 @@ void RemapBadBlock()
 		{
 			//zheng
 			//lun0
-			//xil_printf("bad or good: %d  \n\r",phyBlockMapPtr->phyBlock[dieNo][blockNo].bad);
+			////xil_printf("bad or good: %d  \n\r",phyBlockMapPtr->phyBlock[dieNo][blockNo].bad);
 			if(!(phyBlockMapPtr->phyBlock[dieNo][blockNo].bad))
 			{
 				if(reservedBlockOfLun0[dieNo] < TOTAL_BLOCKS_PER_LUN)
@@ -146,20 +146,20 @@ void RemapBadBlock()
 					}
 					else
 					{
-						xil_printf("No reserved block - Ch %d Way %d virtualBlock %d is bad block \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), blockNo);
+						//xil_printf("No reserved block - Ch %d Way %d virtualBlock %d is bad block \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), blockNo);
 						badBlockCount[dieNo]++;
 					}
 				}
 				else
 				{
-					xil_printf("No reserved block - Ch %d Way %d virtualBlock %d is bad block \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), blockNo);
+					//xil_printf("No reserved block - Ch %d Way %d virtualBlock %d is bad block \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), blockNo);
 					badBlockCount[dieNo]++;
 				}
 			}
 		}
 	}
 
-	xil_printf("Bad block remapping end\r\n");
+	//xil_printf("Bad block remapping end\r\n");
 
 
 	maxBadBlockCount = 0;
@@ -335,7 +335,7 @@ void FindBadBlock(unsigned char dieState[], unsigned int tempBbtBufAddr[], unsig
 				}
 				else
 				{
-					xil_printf("	bad block is detected: Ch %d Way %d phyBlock %d \r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
+					//xil_printf("	bad block is detected: Ch %d Way %d phyBlock %d \r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
 
 					blockChecker[dieNo] = BLOCK_STATE_BAD;
 				}
@@ -352,7 +352,7 @@ void FindBadBlock(unsigned char dieState[], unsigned int tempBbtBufAddr[], unsig
 				if(!((*markPointer0 == CLEAN_DATA_IN_BYTE) && (*markPointer1 == CLEAN_DATA_IN_BYTE)))
 					if(blockChecker[dieNo] == BLOCK_STATE_NORMAL)
 					{
-						xil_printf("	bad block is detected: Ch %d Way %d phyBlock %d \r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
+						//xil_printf("	bad block is detected: Ch %d Way %d phyBlock %d \r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
 
 						blockChecker[dieNo] = BLOCK_STATE_BAD;
 
@@ -429,8 +429,8 @@ void SaveBadBlockTable(unsigned char dieState[], unsigned int tempBbtBufAddr[], 
 
 
 	for(dieNo=0; dieNo < USER_DIES; dieNo++)
-		if(dieState[dieNo] == DIE_STATE_BAD_BLOCK_TABLE_NOT_EXIST)
-			xil_printf("[ bad block table of Ch %d Way %d is saved. ]\r\n", dieNo%USER_CHANNELS, dieNo/USER_CHANNELS);
+		if(dieState[dieNo] == DIE_STATE_BAD_BLOCK_TABLE_NOT_EXIST);
+			//xil_printf("[ bad block table of Ch %d Way %d is saved. ]\r\n", dieNo%USER_CHANNELS, dieNo/USER_CHANNELS);
 }
 
 
@@ -468,10 +468,10 @@ void RecoverBadBlockTable(unsigned int tempBufAddr)
 	{
 		bbtTableChecker = (unsigned char*)(tempBbtBufAddr[dieNo]);
 		//zheng
-		//xil_printf("%d is %d\n\r",bbtTableChecker,*bbtTableChecker);
+		////xil_printf("%d is %d\n\r",bbtTableChecker,*bbtTableChecker);
 		if((*bbtTableChecker == BLOCK_STATE_NORMAL)||(*bbtTableChecker == BLOCK_STATE_BAD))
 		{
-			xil_printf("[ bad block table of ch %d way %d exists.]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
+			//xil_printf("[ bad block table of ch %d way %d exists.]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
 
 			dieState[dieNo] = DIE_STATE_BAD_BLOCK_TABLE_EXIST;
 			for(phyBlockNo=0; phyBlockNo<TOTAL_BLOCKS_PER_DIE; phyBlockNo++)
@@ -481,17 +481,17 @@ void RecoverBadBlockTable(unsigned int tempBufAddr)
 				phyBlockMapPtr->phyBlock[dieNo][phyBlockNo].bad = *bbtTableChecker;
 				//zheng
 				/*if((dieNo == 0 && phyBlockNo == 0) || (dieNo == 1 && phyBlockNo == 0)){
-					xil_printf("find %d,%d\n\r",dieNo,phyBlockNo);
+					//xil_printf("find %d,%d\n\r",dieNo,phyBlockNo);
 				}*/
-				if(phyBlockMapPtr->phyBlock[dieNo][phyBlockNo].bad == BLOCK_STATE_BAD)
-					xil_printf("	bad block: ch %d way %d phyBlock %d  \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
+				if(phyBlockMapPtr->phyBlock[dieNo][phyBlockNo].bad == BLOCK_STATE_BAD);
+					//xil_printf("	bad block: ch %d way %d phyBlock %d  \r\n", Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo), phyBlockNo);
 			}
 
-			xil_printf("[ bad blocks of ch %d way %d are checked. ]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
+			//xil_printf("[ bad blocks of ch %d way %d are checked. ]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
 		}
 		else
 		{
-			xil_printf("[ bad block table of ch %d way %d does not exist.]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
+			//xil_printf("[ bad block table of ch %d way %d does not exist.]\r\n",Vdie2PchTranslation(dieNo), Vdie2PwayTranslation(dieNo));
 			dieState[dieNo] = DIE_STATE_BAD_BLOCK_TABLE_NOT_EXIST;
 			bbtMaker = BAD_BLOCK_TABLE_MAKER_TRIGGER;
 		}
@@ -515,12 +515,12 @@ void EraseTotalBlockSpace()
 {
 	unsigned int blockNo, dieNo, reqSlotTag;
 
-	xil_printf("Erase total block space...wait for a minute...\r\n");
+	//xil_printf("Erase total block space...wait for a minute...\r\n");
 
 	for(blockNo=0 ; blockNo<TOTAL_BLOCKS_PER_DIE ; blockNo++){
 		//zheng
 		//if(blockNo != 217 && blockNo != 2996 && blockNo != 4002 ){
-			xil_printf("%d begin.\n\r",blockNo);
+			//xil_printf("%d begin.\n\r",blockNo);
 					for(dieNo=0 ; dieNo<USER_DIES ; dieNo++)
 					{
 						reqSlotTag = GetFromFreeReqQ();
@@ -544,7 +544,7 @@ void EraseTotalBlockSpace()
 	}
 
 	SyncAllLowLevelReqDone();
-	xil_printf("Done.\r\n");
+	//xil_printf("Done.\r\n");
 }
 
 
@@ -552,7 +552,7 @@ void EraseUserBlockSpace()
 {
 	unsigned int blockNo, dieNo, reqSlotTag;
 
-	xil_printf("Erase User block space...wait for a minute...\r\n");
+	//xil_printf("Erase User block space...wait for a minute...\r\n");
 
 	for(blockNo=0 ; blockNo<USER_BLOCKS_PER_DIE ; blockNo++)
 		for(dieNo=0 ; dieNo<USER_DIES ; dieNo++)
@@ -573,7 +573,7 @@ void EraseUserBlockSpace()
 			}
 
 	SyncAllLowLevelReqDone();
-	xil_printf("Done.\r\n");
+	//xil_printf("Done.\r\n");
 }
 
 
@@ -582,7 +582,7 @@ void InitBlockDieMap()
 	unsigned int dieNo;
 	//unsigned char eraseFlag = 1;
 
-	//xil_printf("Press 'X' to re-make the bad block table.\r\n");
+	////xil_printf("Press 'X' to re-make the bad block table.\r\n");
 	//if (inbyte() == 'X')
 	//{
 	//	EraseTotalBlockSpace();
@@ -598,7 +598,7 @@ void InitBlockDieMap()
 	//zheng
 	for(dieNo=0 ; dieNo<USER_DIES ; dieNo++){
 		phyBlockMapPtr->phyBlock[dieNo][bbtInfoMapPtr->bbtInfo[dieNo].phyBlock].bad = 0;
-		xil_printf("set zero %d,%d\n\r",dieNo,bbtInfoMapPtr->bbtInfo[dieNo].phyBlock);
+		//xil_printf("set zero %d,%d\n\r",dieNo,bbtInfoMapPtr->bbtInfo[dieNo].phyBlock);
 	}
 	RemapBadBlock();
 

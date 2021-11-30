@@ -180,9 +180,9 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 		    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
 		    {
 			    usleep(100);
-		    }*/
+		    }
 		//xil_printf("WRITE IO CQ DONE!\n\r");
-	    }
+	    }*/
 	}
 	else if(read_admin_sq == TRUE)
 	{
@@ -196,10 +196,10 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE)
 			{
 				usleep(100);
-			}*/
+			}
 			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
-		}
+		}*/
 
 		if((read_io_sq == TRUE))
 		{
@@ -212,9 +212,9 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
 			    {
 				usleep(100);
-			    }*/
+			    }
 			//xil_printf("WRITE IO CQ DONE!\n\r");
-			}
+			}*/
 		}
 	}
 }
