@@ -217,8 +217,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag = cmdSlotTag;
 	reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr = tempLsa;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex = nvmeDmaStartIndex;
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1   2个nvme block对应一个存储slice，这里计算这两个中的第几个
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1        本次传输slice中包含的nvme block数目
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1   
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1        
 	if(start_offset)
 	{
 		reqPoolPtr->reqPool[reqSlotTag].prp_offset_exist = 1;
@@ -251,7 +251,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		    t++;
 		}
 	}
-
+	//for first transform, we should not enable cq submmit
+	reqPoolPtr->reqPool[reqSlotTag].cqEn = 0;
 	PutToSliceReqQ(reqSlotTag);
 
 	tempLsa++;
@@ -306,7 +307,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			    t++;
 			}
 		}
-
+		reqPoolPtr->reqPool[reqSlotTag].cqEn = 0;
 		PutToSliceReqQ(reqSlotTag);
 
 		tempLsa++;
@@ -319,6 +320,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	nvmeBlockOffset = 0;
 	tempNumOfNvmeBlock = (startLba + requestedNvmeBlock) % NVME_BLOCKS_PER_SLICE;
 	if((tempNumOfNvmeBlock == 0) || (loop == 0))
+		//last reqSlotTag is the last req for this nvme cmd
+		reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 		return ;
 
 	reqSlotTag = GetFromFreeReqQ();
@@ -362,6 +365,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		    t++;
 		}
 	}
+	reqPoolPtr->reqPool[reqSlotTag].cqEn = 1;
 	PutToSliceReqQ(reqSlotTag);
 	//xil_printf("ReqTransNvmeToSlice end!\n\r");
 }
@@ -784,6 +788,7 @@ void ReleaseBlockedByRowAddrDepReq(unsigned int chNo, unsigned int wayNo)
 
 void IssueNvmeDmaReq(unsigned int reqSlotTag)
 {
+	nvme_cq_entry_t io_cq_entry;
 	//unsigned int devAddr, dmaIndex, numOfNvmeBlock;
     u32 t,p;
     u64 ddr_offset;
@@ -816,6 +821,13 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 	        }
 	        //last
 	        H2C_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t], reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t], ddr_offset);
+			if(reqPoolPtr->reqPool[reqSlotTag].cqEn == 1)
+			{
+				while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+		    	{
+			    usleep(100);
+		    	}
+			}
 		}
 		else
 		{
@@ -833,6 +845,13 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 				H2C_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t], reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t], ddr_offset);
 				ddr_offset = ddr_offset + (u64)(reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 				t++;
+			}
+			if(reqPoolPtr->reqPool[reqSlotTag].cqEn == 1)
+			{
+				while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+		    	{
+			    usleep(100);
+		    	}
 			}
 		}
 	}
@@ -863,6 +882,13 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 	        //last
 	        C2H_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t], reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t], ddr_offset);
 		}
+		if(reqPoolPtr->reqPool[reqSlotTag].cqEn == 1)
+		{
+			while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+		    {
+				usleep(100);
+		    }
+		}
 		else
 		{
 			t = reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset;
@@ -879,6 +905,13 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 				C2H_DMA_PRP2DATA(reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t], reqPoolPtr->reqPool[reqSlotTag].dataBufInfo.entry,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t], ddr_offset);
 				ddr_offset = ddr_offset + (u64)(reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 				t++;
+			}
+			if(reqPoolPtr->reqPool[reqSlotTag].cqEn == 1)
+			{
+				while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
+				{
+					usleep(100);
+				}
 			}
 		}
 	}
