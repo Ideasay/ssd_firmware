@@ -29,10 +29,10 @@ u32 g_buf[1024];
 int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry, unsigned short cmdSlotTag);
 
 //refer to void handle_nvme_io_read
-void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry);
+void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
 
 //refer to void handle_nvme_io_write
-void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry);
+void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
 
 
 
