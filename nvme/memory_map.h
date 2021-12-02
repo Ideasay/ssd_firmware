@@ -68,8 +68,8 @@
 
 #define NVME_DATA_SIM_ADDR				    (NVME_REQ_SIM_ADDR + 10*sizeof(NVME_COMMAND))
 //*******/
-
-
+#define RESERVED1_START_ADDR                (NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
+//#define RESERVED1_START_ADDR                (FTL_MANAGEMENT_END_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
 /***********************
  * ourNVMe Segement begin
  * ******************/
@@ -91,7 +91,7 @@
 #define PL_CQ_ENTRY_NUM					(8)
 
 // PL-side SQ-data buffer base address, XPAR_AXI_BRAM_CTRL_2_S_AXI_BASEADDR
-#define PL_SQ_DATA_BUF_BASEADDR			(0xa0000000 +0x1000)
+#define PL_SQ_DATA_BUF_BASEADDR			(0xa0000000+0x1000)
 // PL-side SQ-data buffer size(byte)
 #define PL_SQ_DATA_BUF_SIZE				(4096)
 
@@ -104,17 +104,11 @@
 #define PL_IO_WRITE_BUF_BASEADDR	    (PL_IO_READ_BUF_BASEADDR+0x2000)
 #define PL_IO_PRP_BUF_BASEADDR	        (PL_IO_WRITE_BUF_BASEADDR+0x4000)
 #define PL_IO_END                       (PL_IO_PRP_BUF_BASEADDR+0x2000)
-
 /***********************
  * ourNVMe Segement end
  * ******************/
-
-
-#define RESERVED1_START_ADDR                PL_IO_END//(NVME_DATA_SIM_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
-//#define RESERVED1_START_ADDR                (FTL_MANAGEMENT_END_ADDR + 10*BYTES_PER_DATA_REGION_OF_SLICE)
 
 #define RESERVED1_END_ADDR					XPAR_MIG_0_HIGHADDR
 #define DRAM_END_ADDR						XPAR_MIG_0_HIGHADDR
 
 #endif /* MEMORY_MAP_H_ */
-
