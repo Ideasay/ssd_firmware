@@ -72,7 +72,7 @@ void InitDataBuf()
 	tempDataBufMapPtr = (P_TEMPORARY_DATA_BUF_MAP)TEMPORARY_DATA_BUFFER_MAP_ADDR;
 
 
-	////xil_printf("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
+	//xil_printf("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
 
 	for(bufEntry = 0; bufEntry < AVAILABLE_DATA_BUFFER_ENTRY_COUNT; bufEntry++)
 	{
@@ -80,8 +80,8 @@ void InitDataBuf()
 		dataBufMapPtr->dataBuf[bufEntry].prevEntry = bufEntry-1;
 		dataBufMapPtr->dataBuf[bufEntry].nextEntry = bufEntry+1;
 
-		////xil_printf("bufEntry is 0x%x\n", bufEntry);
-		////xil_printf("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
+		//xil_printf("bufEntry is 0x%x\n", bufEntry);
+		//xil_printf("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
 
 		dataBufMapPtr->dataBuf[bufEntry].dirty = DATA_BUF_CLEAN;
 		dataBufMapPtr->dataBuf[bufEntry].blockingReqTail =  REQ_SLOT_TAG_NONE;

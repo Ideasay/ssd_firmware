@@ -69,8 +69,8 @@ void InitFTL()
 
 	storageCapacity_L = (MB_PER_SSD - (MB_PER_MIN_FREE_BLOCK_SPACE + mbPerbadBlockSpace + MB_PER_OVER_PROVISION_BLOCK_SPACE)) * ((1024*1024) / BYTES_PER_NVME_BLOCK);
 
-	xil_printf("[ storage capacity %d MB ]\r\n", storageCapacity_L / ((1024*1024) / BYTES_PER_NVME_BLOCK));
-	xil_printf("[ ftl configuration complete. ]\r\n");
+	//xil_printf("[ storage capacity %d MB ]\r\n", storageCapacity_L / ((1024*1024) / BYTES_PER_NVME_BLOCK));
+	//xil_printf("[ ftl configuration complete. ]\r\n");
 }
 
 
@@ -147,7 +147,7 @@ void InitNandArray()
 
 	SyncAllLowLevelReqDone();
 
-	xil_printf("[ NAND device reset complete. ]\r\n");
+	//xil_printf("[ NAND device reset complete. ]\r\n");
 }
 
 

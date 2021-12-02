@@ -692,14 +692,14 @@ void IssueNandReq(unsigned int chNo, unsigned int wayNo)
 
         progpage_80h_10h(base_addr, wayNo +1 , 0x00000000, rowAddr, BYTES_PER_DATA_REGION_OF_PAGE, (uint32_t)dataBufAddr);//spareDataBufAddr
 		//V2FProgramPageAsync(chCtlReg[chNo], wayNo, rowAddr, dataBufAddr, spareDataBufAddr);
-    	xil_printf("!!! program data from No.%d data buffer to Ch%d flash(addr=0x%08x) complete !!! \r\n", databuffer_index, chNo,rowAddr);
+    	//xil_printf("!!! program data from No.%d data buffer to Ch%d flash(addr=0x%08x) complete !!! \r\n", databuffer_index, chNo,rowAddr);
 	}
 	else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_ERASE)
 	{
 		dieStateTablePtr->dieState[chNo][wayNo].reqStatusCheckOpt = REQ_STATUS_CHECK_OPT_CHECK;
 
         eraseblock_60h_d0h(base_addr, wayNo +1 , rowAddr);
-        xil_printf("!!! erase  Ch%d flash(addr=0x%08x) complete !!! \r\n", chNo,rowAddr);
+        //xil_printf("!!! erase  Ch%d flash(addr=0x%08x) complete !!! \r\n", chNo,rowAddr);
 		//V2FEraseBlockAsync(chCtlReg[chNo], wayNo, rowAddr);
 	}
 	else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_RESET)
@@ -958,17 +958,17 @@ void ExecuteNandReq(unsigned int chNo, unsigned int wayNo, unsigned int reqStatu
 						return;
 					}
 
-				if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_READ)
+				/*if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_READ)
 					xil_printf("Read Trigger FAIL on      ");
 				else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_READ_TRANSFER)
 					xil_printf("Read Transfer FAIL on     ");
 				else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_WRITE)
 					xil_printf("Write FAIL on             ");
 				else if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_ERASE)
-					xil_printf("Erase FAIL on             ");
+					xil_printf("Erase FAIL on             ");*/
 
 				rowAddr = GenerateNandRowAddr(reqSlotTag);
-				xil_printf("ch %x way %x rowAddr %x / completion %x statusReport %x \r\n", chNo, wayNo, rowAddr, completeFlagTablePtr->completeFlag[chNo][wayNo],statusReportTablePtr->statusReport[chNo][wayNo]);
+				//xil_printf("ch %x way %x rowAddr %x / completion %x statusReport %x \r\n", chNo, wayNo, rowAddr, completeFlagTablePtr->completeFlag[chNo][wayNo],statusReportTablePtr->statusReport[chNo][wayNo]);
 
 				if(reqPoolPtr->reqPool[reqSlotTag].reqOpt.nandEcc == REQ_OPT_NAND_ECC_OFF)
 					if(reqPoolPtr->reqPool[reqSlotTag].reqOpt.dataBufFormat == REQ_OPT_DATA_BUF_ADDR)
@@ -989,7 +989,7 @@ void ExecuteNandReq(unsigned int chNo, unsigned int wayNo, unsigned int reqStatu
 			else if(reqStatus == REQ_STATUS_WARNING)
 			{
 				rowAddr = GenerateNandRowAddr(reqSlotTag);
-				xil_printf("ECC Uncorrectable Soon on ch %x way %x rowAddr %x / completion %x statusReport %x \r\n", chNo, wayNo, rowAddr, completeFlagTablePtr->completeFlag[chNo][wayNo],statusReportTablePtr->statusReport[chNo][wayNo]);
+				//xil_printf("ECC Uncorrectable Soon on ch %x way %x rowAddr %x / completion %x statusReport %x \r\n", chNo, wayNo, rowAddr, completeFlagTablePtr->completeFlag[chNo][wayNo],statusReportTablePtr->statusReport[chNo][wayNo]);
 
 				//grown bad block information update
 				phyBlockNo = ((rowAddr % LUN_1_BASE_ADDR) / PAGES_PER_SLC_BLOCK) + ((rowAddr / LUN_1_BASE_ADDR)* TOTAL_BLOCKS_PER_LUN);

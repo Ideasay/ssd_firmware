@@ -98,11 +98,11 @@ int main()
 {	
 	//init platform
     init_platform();
-    xil_printf("======NVMe Test Start========\n\r");
+    //xil_printf("======NVMe Test Start========\n\r");
     Xil_DCacheDisable();
 	Xil_ICacheDisable();
 	//init FTL & clear whole disk
-	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
+	//xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 
     if(PRINT)
     {
@@ -154,10 +154,10 @@ int main()
     }
 	InitFTL();
 
-	xil_printf("\r\nFTL reset complete!!! \r\n");
+	//xil_printf("\r\nFTL reset complete!!! \r\n");
     eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f800);
     eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f800);
-    xil_printf("erase two channels(addr 0x7f800) complete! \r\n");
+    //xil_printf("erase two channels(addr 0x7f800) complete! \r\n");
     xil_printf("Configure NVMe here! \r\n");
 	// Paging table set
 	#define MB (1024*1024)
@@ -191,7 +191,7 @@ int main()
 				{
 					state = NVME_STATE_ENABLED;
 					//g_nvmeTask.status = state;
-					xil_printf("NVMe Reg CC_EN is set\n\r");
+					//xil_printf("NVMe Reg CC_EN is set\n\r");
 				}
 				break;
 				//not break, just fall through
@@ -205,7 +205,7 @@ int main()
 				init_nvme_controller(0);
 				set_csts_rdy(1);
      			//xdma_msix_vector_print();
-				xil_printf("PS Set CSTS RDY \n\r");
+				//xil_printf("PS Set CSTS RDY \n\r");
 				break;
 				//not break, just fall through
 			}
@@ -218,7 +218,7 @@ int main()
 					//g_nvmeTask.status = state;
 					init_nvme_controller(1);
 					set_csts_rdy(0);
-					xil_printf("Controller Reset \n\r");
+					//xil_printf("Controller Reset \n\r");
 				}
 				else if(get_reg_cc_shn())
 				{
@@ -226,7 +226,7 @@ int main()
 					//g_nvmeTask.status = state;
 					//init_nvme_controller(1);
 					set_csts_shst(2);
-					xil_printf("Controller Shutdown \n\r");
+					//xil_printf("Controller Shutdown \n\r");
 				}
 				else
 				{
@@ -249,7 +249,7 @@ int main()
 					//g_nvmeTask.status = state;
 					set_csts_shst(0);
 					set_csts_rdy(0);
-					xil_printf("Controller Restart \n\r");
+					//xil_printf("Controller Restart \n\r");
 				}
 				break;
 			}
@@ -268,7 +268,7 @@ int main()
 		}
 
 	}//while
-	xil_printf("======NVMe Test End========\n\r");
+	//xil_printf("======NVMe Test End========\n\r");
 	cleanup_platform();
 	return 0;
 }//main
