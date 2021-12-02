@@ -79,7 +79,7 @@ void InitDependencyTable()
 	}
 }
 
-void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length)
+void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length, nvme_cq_entry_t *cq_entry)
 {
 	unsigned int reqSlotTag, requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, tempLsa, loop, nvmeBlockOffset, nvmeDmaStartIndex, reqCode;
 	//new added for transforming req
@@ -217,8 +217,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag = cmdSlotTag;
 	reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr = tempLsa;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex = nvmeDmaStartIndex;
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1   2¸önvme block¶ÔÓ¦Ò»¸ö´æ´¢slice£¬ÕâÀï¼ÆËãÕâÁ½¸öÖÐµÄµÚ¼¸¸ö
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1        ±¾´Î´«ÊäsliceÖÐ°üº¬µÄnvme blockÊýÄ¿
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1   2ï¿½ï¿½nvme blockï¿½ï¿½Ó¦Ò»ï¿½ï¿½ï¿½æ´¢sliceï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄµÚ¼ï¿½ï¿½ï¿½
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1        ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½sliceï¿½Ð°ï¿½ï¿½ï¿½ï¿½ï¿½nvme blockï¿½ï¿½Ä¿
 	if(start_offset)
 	{
 		reqPoolPtr->reqPool[reqSlotTag].prp_offset_exist = 1;

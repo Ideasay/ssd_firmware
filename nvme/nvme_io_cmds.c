@@ -3,7 +3,7 @@
 
 //#define debug 0
 //changed in 1030
-void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
+void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
 {
 	nvme_sq_read_dw12_t* sq_entry_dw12;
 	u32 nlb;
@@ -27,12 +27,12 @@ void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	start_offset = (u32)(prp[0]) & offset_mask;
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
 
-	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_READ,prp[0],prp[1], prp_num,start_offset,data_length);
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_READ,prp[0],prp[1], prp_num,start_offset,data_length,cq_entry);
 
 	ReqTransSliceToLowLevel();
 }
 
-void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
+void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
 {
 	nvme_sq_read_dw12_t* sq_entry_dw12;
 
@@ -60,7 +60,7 @@ void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry)
 	prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
 	
 	//this function contains prp decode function
-	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length);
+	ReqTransNvmeToSlice(cmdSlotTag, startLba[0], nlb, IO_NVM_WRITE,prp[0],prp[1], prp_num,start_offset,data_length,cq_entry);
 
 	ReqTransSliceToLowLevel();
 }
@@ -81,14 +81,14 @@ int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry,unsigned
 		case IO_NVM_WRITE:
 		{
 			//xil_printf("IO Write Command\r\n");
-			handle_nvme_io_write(cmdSlotTag, sq_entry);
+			handle_nvme_io_write(cmdSlotTag, sq_entry, cq_entry);
 
 			break;
 			}
 		case IO_NVM_READ:
 		{
 			//xil_printf("IO Read Command\r\n");
-			handle_nvme_io_read(cmdSlotTag, sq_entry);
+			handle_nvme_io_read(cmdSlotTag, sq_entry, cq_entry);
 			break;
 		}
 		default:
