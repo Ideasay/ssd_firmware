@@ -893,6 +893,13 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 	}
 	else
 		assert(!"[WARNING] Not supported reqCode [WARNING]");
+	if((reqPoolPtr->reqPool[reqSlotTag].cqEn) == 1)
+	{
+		while(nvme_write_io_cq_entry(reqPoolPtr->reqPool[reqSlotTag].cqEntry) == FALSE)
+		{
+			usleep(100);
+		}
+	}
 }
 
 void CheckDoneNvmeDmaReq()

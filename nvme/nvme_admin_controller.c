@@ -191,7 +191,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 		//memcpy(nvmeCmd->cmdDword,&admin_sq_entry,sizeof(nvme_sq_entry_t));
 		//nvmeCmd->cmdSlotTag = 0;
 	    need_cqe = process_admin_cmd(&admin_sq_entry, &admin_cq_entry);
-		/*if(need_cqe)
+		if(need_cqe)
 		{
 			while(nvme_write_cq_entry(&admin_cq_entry) == FALSE)
 			{
@@ -199,7 +199,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			}
 			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
-		}*/
+		}
 
 		if((read_io_sq == TRUE))
 		{
