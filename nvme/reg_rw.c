@@ -88,7 +88,7 @@ void xdma_usr_irq_vector_set(u16 irq_num, u16 vec_num)
 		case 2: wr_data = (data & 0xFF00FFFF) | ((u32)vec_num << 16); break;
 		case 3: wr_data = (data & 0x00FFFFFF) | ((u32)vec_num << 24); break;
 	}
-//	//xil_printf("IRQ Vector addr: 0x%x, rd_data: 0x%x, wr_data: 0x%x\n\r", addr, data, wr_data);
+    XDMA_PRINT("IRQ Vector addr: 0x%x, rd_data: 0x%x, wr_data: 0x%x\n\r", addr, data, wr_data);
 	Xil_Out32(addr, wr_data);
 }
 
@@ -101,18 +101,20 @@ void xdma_msix_vector_print()
 	for (int i = 0; i < 4*N; i++){
 		//u32 value = Xil_In32(XDMA_REG_BASEADDR + XDMA_MSIX_VECTOR_TABLE_ADDR + 4*i);
 		switch(i%4){
-				case 0: //xil_printf("MSIX Vector Lower Address: 0x%x, ", value);
+				case 0: XDMA_PRINT("MSIX Vector Lower Address: 0x%x, ", value);
 					break;
-				case 1: //xil_printf("Upper Address: 0x%x, ", value);
+				case 1: XDMA_PRINT("Upper Address: 0x%x, ", value);
 					break;
-				case 2: //xil_printf("Data: 0x%x, ", value);
+				case 2: XDMA_PRINT("Data: 0x%x, ", value);
 					break;
-				case 3: //xil_printf("Control: 0x%x\n\r", value);
+				case 3: XDMA_PRINT("Control: 0x%x\n\r", value);
 					break;
 			}
 	}
-	//u32 value = Xil_In32(XDMA_REG_BASEADDR + XDMA_MSIX_PBA_ADDR);
-	//xil_printf("MSIX PBA: 0x%x\n\r", value);
+#ifdef XDMA_DEBUG
+	u32 value = Xil_In32(XDMA_REG_BASEADDR + XDMA_MSIX_PBA_ADDR);
+	XDMA_PRINT("MSIX PBA: 0x%x\n\r", value);
+#endif
 }
 
 

@@ -214,8 +214,8 @@ void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
 	databuffer_ptr = (DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE + offset);//(char*)
 	write_ioD_h2c_dsc(addr_total,databuffer_ptr,dataLengthForSlice);// unit is byte!
 	while((get_io_dma_status() & 0x1) == 0);
-    //xil_printf("!!! copy data to DDR data buffer No.%d complete !!! \r\n", databuffer_index);
-    //xil_printf("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
+	NVME_PRINT("!!! copy data to DDR data buffer No.%d complete !!! \r\n", databuffer_index);
+	NVME_PRINT("!!! first 4 bytes of the data buffer are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
@@ -229,8 +229,8 @@ void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
 	databuffer_ptr = (DATA_BUFFER_BASE_ADDR + databuffer_index * BYTES_PER_DATA_REGION_OF_SLICE + offset);//(char*)
 	write_ioD_c2h_dsc(addr_total,(u64)databuffer_ptr,dataLengthForSlice);// unit is byte!
 	while((get_io_dma_status() & 0x4) == 0);
-    //xil_printf("!!! read data from DDR data buffer No.%d complete !!! \r\n", databuffer_index);
-    //xil_printf("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
+	NVME_PRINT("!!! read data from DDR data buffer No.%d complete !!! \r\n", databuffer_index);
+	NVME_PRINT("!!! first 4 bytes of read data are 0x%08x \r\n", *((unsigned int*)(u32)databuffer_ptr));
     //unsigned char tempTail;
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.autoDmaTxCnt++;

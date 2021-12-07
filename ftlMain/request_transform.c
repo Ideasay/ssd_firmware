@@ -101,21 +101,22 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	nvmeDmaStartIndex = 0;
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
 	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
-	//xil_printf("ReqTransNvmeToSlice here!\n\r");
-	//xil_printf("startLba is 0x%x\n\r",startLba);
-	//xil_printf("start_offset is 0x%x\n\r",start_offset);
-	//xil_printf("prpNum is 0x%x\n\r",prpNum);
-	//xil_printf("requestedNvmeBlock is 0x%x\n\r",requestedNvmeBlock);
-	//xil_printf("loop is 0x%x\n\r",loop);
+	SLICE_PRINT("ReqTransNvmeToSlice\n\r");
+	SLICE_PRINT("ReqTransNvmeToSlice here!\n\r");
+	SLICE_PRINT("startLba is 0x%x\n\r",startLba);
+	SLICE_PRINT("start_offset is 0x%x\n\r",start_offset);
+	SLICE_PRINT("prpNum is 0x%x\n\r",prpNum);
+	SLICE_PRINT("requestedNvmeBlock is 0x%x\n\r",requestedNvmeBlock);
+	SLICE_PRINT("loop is 0x%x\n\r",loop);
 	if(cmdCode == IO_NVM_WRITE)
 	{
 		reqCode = REQ_CODE_WRITE;
-		//xil_printf("WRITE (to slice)!\n\r");
+		SLICE_PRINT("WRITE (to slice)!\n\r");
 	}
 	else if(cmdCode == IO_NVM_READ)
 	{
 		reqCode = REQ_CODE_READ;
-		//xil_printf("READ (to slice)!\n\r");
+		SLICE_PRINT("READ (to slice)!\n\r");
 	}
 	else
 		assert(!"[WARNING] Not supported command code [WARNING]");
@@ -124,8 +125,10 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		prpCnt = 1;
 		prpCollectedForSlice[0] = prp1ForReq;
 		dataLengthForSlice[0] = LBA_SIZE - start_offset;
-		//xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
-		//xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
+		SLICE_PRINT("prpNum == 1\n\r");
+		SLICE_PRINT("prpCollectedForSlice[0](L) is 0x%x!\n\r",prpCollectedForSlice[0]);
+		SLICE_PRINT("prpCollectedForSlice[0](H) is 0x%x!\n\r",prpCollectedForSlice[0]>>32);
+		SLICE_PRINT("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
 	}
 	else if(prpNum == 2)
 	{
@@ -134,18 +137,26 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		prpCollectedForSlice[1] = prp2ForReq & (0-(1<<12));
 		dataLengthForSlice[0] = LBA_SIZE - start_offset;
 		dataLengthForSlice[1] = data_length - dataLengthForSlice[0];
-		//xil_printf("prpCollectedForSlice[0] is 0x%x!\n\r",prpCollectedForSlice[0]);
-		//xil_printf("prpCollectedForSlice[1] is 0x%x!\n\r",prpCollectedForSlice[1]);
-		//xil_printf("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
-		//xil_printf("dataLengthForSlice[1] is 0x%x!\n\r",dataLengthForSlice[1]);
+		SLICE_PRINT("prpNum == 2\n\r");
+		SLICE_PRINT("prpCollectedForSlice[0](L) is 0x%x!\n\r",prpCollectedForSlice[0]);
+		SLICE_PRINT("prpCollectedForSlice[0](H) is 0x%x!\n\r",prpCollectedForSlice[0]>>32);
+		SLICE_PRINT("prpCollectedForSlice[1](L) is 0x%x!\n\r",prpCollectedForSlice[1]);
+		SLICE_PRINT("prpCollectedForSlice[1](H) is 0x%x!\n\r",prpCollectedForSlice[1]>>32);
+		SLICE_PRINT("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
+		SLICE_PRINT("dataLengthForSlice[1] is 0x%x!\n\r",dataLengthForSlice[1]);
 	}
 	else
 	{
 		//add prp[0]
 		prpCollectedForSlice[0] = prp1ForReq;
+		SLICE_PRINT("prpNum >=3\n\r");
+
 		prpCnt = 1;
 		dataLengthForSlice[0] = LBA_SIZE - start_offset;
 		left_length = data_length - dataLengthForSlice[0];
+		SLICE_PRINT("prpCollectedForSlice[0](L) is 0x%x!\n\r",prpCollectedForSlice[0]);
+		SLICE_PRINT("prpCollectedForSlice[0](H) is 0x%x!\n\r",prpCollectedForSlice[0]>>32);
+		SLICE_PRINT("dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
 		int left_prp_num = prpNum-1;
 		//next prp should be restored in prpCollectedForSlice array also.
 		u64 next_prplist_addr = prp2ForReq;
@@ -183,6 +194,8 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			    addr_total=((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
 				addr_total= addr_total & (0-(1<<12)) ;
 			    prpCollectedForSlice[prpCnt] = addr_total;
+			    SLICE_PRINT("prpCollectedForSlice[%d](L) is 0x%llx!\n\r",prpCnt,prpCollectedForSlice[prpCnt]);
+			    SLICE_PRINT("prpCollectedForSlice[%d](H) is 0x%llx!\n\r",prpCnt,prpCollectedForSlice[prpCnt]>>32);
 				if(left_length>LBA_SIZE)
 				{
 					dataLengthForSlice[prpCnt] = LBA_SIZE;
@@ -191,6 +204,7 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			    {
 			    	dataLengthForSlice[prpCnt] = left_length;
 			    }
+				SLICE_PRINT("dataLengthForSlice[%d] is 0x%x!\n\r",prpCnt,dataLengthForSlice[prpCnt]);
 				left_length = left_length - dataLengthForSlice[prpCnt++];//tmp_length
 		    }
 		    if(tmp_prp_num_for_cycle == tmp_prp_num-1)
@@ -218,37 +232,55 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	reqPoolPtr->reqPool[reqSlotTag].nvmeCmdSlotTag = cmdSlotTag;
 	reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr = tempLsa;
 	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex = nvmeDmaStartIndex;
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1   2��nvme block��Ӧһ���洢slice����������������еĵڼ���
-	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1        ���δ���slice�а�����nvme block��Ŀ
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.nvmeBlockOffset = nvmeBlockOffset;  //0,1
+	reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.numOfNvmeBlock = tempNumOfNvmeBlock;//2,1
+
+	SLICE_PRINT("reqSlotTag is 0x%x\n\r",reqSlotTag);
+	SLICE_PRINT("nvmeBlockOffset is 0x%x\n\r",nvmeBlockOffset);
+	SLICE_PRINT("numOfNvmeBlock is 0x%x\n\r",tempNumOfNvmeBlock);
 	if(start_offset)
 	{
+		SLICE_PRINT("start offset exist!!!!\n\r");
 		reqPoolPtr->reqPool[reqSlotTag].prp_offset_exist = 1;
 		t = nvmeBlockOffset;
 		//p = 0;
 		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 	    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 	    t++;
 
 		for(p = 1 ; p < tempNumOfNvmeBlock ; p++)//tempNumOfNvmeBlock=2,t=0 p=012 tempNumOfNvmeBlock=1,   p=01
 		{
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    t++;
 		}
 		//p = tempNumOfNvmeBlock;
 		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 	    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = start_offset;//+++++++++++++++++++
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 	    prpCollectedForSlice[prp_array_transfer_count] = prpCollectedForSlice[prp_array_transfer_count] + start_offset;
 	    dataLengthForSlice[prp_array_transfer_count] = dataLengthForSlice[prp_array_transfer_count] - start_offset;
 	}
 	else
 	{
+		SLICE_PRINT("no start offset!!!!\n\r");
 		reqPoolPtr->reqPool[reqSlotTag].prp_offset_exist = 0;
 		t = nvmeBlockOffset;
 		for(p = 0 ; p < tempNumOfNvmeBlock; p++)
 		{
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    t++;
 		}
 	}
@@ -283,17 +315,26 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			//p = 0;
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    t++;
 
 			for(p = 1 ; p < tempNumOfNvmeBlock ; p++)//tempNumOfNvmeBlock=2,t=0 p=012 tempNumOfNvmeBlock=1,   p=01
 			{
 				reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 			    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 			    t++;
 			}
 			//p = tempNumOfNvmeBlock;
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = start_offset;//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    prpCollectedForSlice[prp_array_transfer_count] = prpCollectedForSlice[prp_array_transfer_count] + start_offset;
 		    dataLengthForSlice[prp_array_transfer_count] = dataLengthForSlice[prp_array_transfer_count] - start_offset;
 		}
@@ -305,6 +346,9 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 			{
 				reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 			    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+			    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 			    t++;
 			}
 		}
@@ -322,10 +366,12 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 	//last transform
 	nvmeBlockOffset = 0;
 	tempNumOfNvmeBlock = (startLba + requestedNvmeBlock) % NVME_BLOCKS_PER_SLICE;
-	if((tempNumOfNvmeBlock == 0) || (loop == 0))
-		reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry = cq_entry;
+	if((tempNumOfNvmeBlock == 0) || (loop == 0))//1
+	{
+		//reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry = cq_entry;
+		memcpy(&(reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry),cq_entry,sizeof(nvme_cq_entry_t));
 		return ;
-
+	}
 	reqSlotTag = GetFromFreeReqQ();
 
 	reqPoolPtr->reqPool[reqSlotTag].reqType = REQ_TYPE_SLICE;
@@ -342,17 +388,26 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		//p = 0;
 		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 	    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 	    t++;
 
 		for(p = 1 ; p < tempNumOfNvmeBlock ; p++)//tempNumOfNvmeBlock=2,t=0 p=012 tempNumOfNvmeBlock=1,   p=01
 		{
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    t++;
 		}
 		//p = tempNumOfNvmeBlock;
 		reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 	    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = start_offset;//+++++++++++++++++++
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+	    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 	    //prpCollectedForSlice[prp_array_transfer_count] = prpCollectedForSlice[prp_array_transfer_count] + start_offset;
 	    //dataLengthForSlice[prp_array_transfer_count] = dataLengthForSlice[prp_array_transfer_count] - start_offset;
 	}
@@ -364,15 +419,19 @@ void ReqTransNvmeToSlice(unsigned int cmdSlotTag, unsigned int startLba, unsigne
 		{
 			reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t] = prpCollectedForSlice[prp_array_transfer_count];//+++++++++++++++++++
 		    reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t] = dataLengthForSlice[prp_array_transfer_count++];//+++++++++++++++++++
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](L) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].prpForEachReq[%d](H) is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].prpForEachReq[t]>>32);
+		    SLICE_PRINT("reqPoolPtr->reqPool[%d].dataLengthForSlice[%d] is 0x%x!\n\r",reqSlotTag,t,reqPoolPtr->reqPool[reqSlotTag].dataLengthForSlice[t]);
 		    t++;
 		}
 	}
 	reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEn = 0;
 	tempLastSliceOfNvme = reqSlotTag;
 	reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEn = 1;
-	reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry = cq_entry;
+	memcpy(&(reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry),cq_entry,sizeof(nvme_cq_entry_t));
+	//reqPoolPtr->reqPool[tempLastSliceOfNvme].cqEntry = cq_entry;
 	PutToSliceReqQ(reqSlotTag);
-	//xil_printf("ReqTransNvmeToSlice end!\n\r");
+	SLICE_PRINT("ReqTransNvmeToSlice end!\n\r");
 }
 
 
@@ -440,15 +499,17 @@ void DataReadFromNand(unsigned int originReqSlotTag)
 void ReqTransSliceToLowLevel()
 {
 	unsigned int reqSlotTag, dataBufEntry;
-	//xil_printf("ReqTransSliceToLowLevel here!\n\r");
+	LEVEL_PRINT("ReqTransSliceToLowLevel here!\n\r");
 	while(sliceReqQ.headReq != REQ_SLOT_TAG_NONE)
 	{
 		reqSlotTag = GetFromSliceReqQ();
+		LEVEL_PRINT("reqSlotTag is %d\n\r",reqSlotTag);
 		if(reqSlotTag == REQ_SLOT_TAG_FAIL)
 			return ;
 
 		//allocate a data buffer entry for this request
 		dataBufEntry = CheckDataBufHit(reqSlotTag);
+		LEVEL_PRINT("dataBufEntry is %d\n\r",dataBufEntry);
 		if(dataBufEntry != DATA_BUF_FAIL)
 		{
 			//data buffer hit
@@ -479,11 +540,17 @@ void ReqTransSliceToLowLevel()
 		{
 			dataBufMapPtr->dataBuf[dataBufEntry].dirty = DATA_BUF_DIRTY;
 			reqPoolPtr->reqPool[reqSlotTag].reqCode = REQ_CODE_RxDMA;
+			LEVEL_PRINT("REQ_CODE_RxDMA\n\r");
 		}
 		else if(reqPoolPtr->reqPool[reqSlotTag].reqCode  == REQ_CODE_READ)
+		{
 			reqPoolPtr->reqPool[reqSlotTag].reqCode = REQ_CODE_TxDMA;
+			LEVEL_PRINT("REQ_CODE_TxDMA\n\r");
+		}
 		else
 			assert(!"[WARNING] Not supported reqCode. [WARNING]");
+
+
 
 		reqPoolPtr->reqPool[reqSlotTag].reqType = REQ_TYPE_NVME_DMA;
 		reqPoolPtr->reqPool[reqSlotTag].reqOpt.dataBufFormat = REQ_OPT_DATA_BUF_ENTRY;
@@ -495,6 +562,7 @@ void ReqTransSliceToLowLevel()
 
 unsigned int CheckBufDep(unsigned int reqSlotTag)
 {
+	DPEN_PRINT("reqPoolPtr->reqPool[reqSlotTag].prevBlockingReq is %d\n\r",reqPoolPtr->reqPool[reqSlotTag].prevBlockingReq);
 	if(reqPoolPtr->reqPool[reqSlotTag].prevBlockingReq == REQ_SLOT_TAG_NONE)
 		return BUF_DEPENDENCY_REPORT_PASS;
 	else
@@ -626,12 +694,15 @@ void SelectLowLevelReqQ(unsigned int reqSlotTag)
 	unsigned int dieNo, chNo, wayNo, bufDepCheckReport, rowAddrDepCheckReport, rowAddrDepTableUpdateReport;
 
 	bufDepCheckReport = CheckBufDep(reqSlotTag);
+	LEVEL_PRINT("SelectLowLevelReqQ here!\r\n");
+	LEVEL_PRINT("bufDepCheckReport is %d\r\n",bufDepCheckReport);
 	if(bufDepCheckReport == BUF_DEPENDENCY_REPORT_PASS)
 	{
 		//here we trigger the dma between nvme and data buffer. and now we should replace it with our own logic.
 		if(reqPoolPtr->reqPool[reqSlotTag].reqType  == REQ_TYPE_NVME_DMA)
 		{
 			IssueNvmeDmaReq(reqSlotTag);
+//lhk 1203 move to internal issuenvmedmareq func
 			PutToNvmeDmaReqQ(reqSlotTag);
 		}
 		else if(reqPoolPtr->reqPool[reqSlotTag].reqType  == REQ_TYPE_NAND)
@@ -672,6 +743,7 @@ void SelectLowLevelReqQ(unsigned int reqSlotTag)
 	}
 	else if(bufDepCheckReport == BUF_DEPENDENCY_REPORT_BLOCKED)
 	{
+		LEVEL_PRINT("req is blocked!\n\r");
 		if(reqPoolPtr->reqPool[reqSlotTag].reqType  == REQ_TYPE_NAND)
 			if(reqPoolPtr->reqPool[reqSlotTag].reqOpt.rowAddrDependencyCheck == REQ_OPT_ROW_ADDR_DEPENDENCY_CHECK)
 			{
@@ -799,6 +871,7 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 	//dmaIndex = reqPoolPtr->reqPool[reqSlotTag].nvmeDmaInfo.startIndex;
 	//devAddr = GenerateDataBufAddr(reqSlotTag);
 	//numOfNvmeBlock = 0;
+    NVME_PRINT("IssueNvmeDmaReq here!\r\n");
 	if(reqPoolPtr->reqPool[reqSlotTag].reqCode == REQ_CODE_RxDMA)//  h2c
 	{
 		if(reqPoolPtr->reqPool[reqSlotTag].prp_offset_exist)
@@ -893,9 +966,12 @@ void IssueNvmeDmaReq(unsigned int reqSlotTag)
 	}
 	else
 		assert(!"[WARNING] Not supported reqCode [WARNING]");
+
+	NVME_PRINT("issue prp dma done!\n\r");
+	NVME_PRINT("reqPoolPtr->reqPool[reqSlotTag].cqEn is %d\n\r",reqPoolPtr->reqPool[reqSlotTag].cqEn);
 	if((reqPoolPtr->reqPool[reqSlotTag].cqEn) == 1)
 	{
-		while(nvme_write_io_cq_entry(reqPoolPtr->reqPool[reqSlotTag].cqEntry) == FALSE)
+		while(nvme_write_io_cq_entry(&(reqPoolPtr->reqPool[reqSlotTag].cqEntry)) == FALSE)
 		{
 			usleep(100);
 		}
@@ -910,7 +986,7 @@ void CheckDoneNvmeDmaReq()
 	reqSlotTag = nvmeDmaReqQ.tailReq;
 	rxDone = 0;
 	txDone = 0;
-
+	NVME_PRINT("CheckDoneNvmeDmaReq!\n\r");
 	while(reqSlotTag != REQ_SLOT_TAG_NONE)
 	{
 		prevReq = reqPoolPtr->reqPool[reqSlotTag].prevReq;

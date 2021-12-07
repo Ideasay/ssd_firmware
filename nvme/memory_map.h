@@ -1,6 +1,120 @@
 #ifndef MEMORY_MAP_H_
 #define MEMORY_MAP_H_
 
+//#define NVME_DEBUG
+//#define ADDR_DEBUG
+//#define MAIN_DEBUG
+#define SLICE_DEBUG 	  //ReqTransNvmeToSlice
+//#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
+//#define DPEN_DEBUG      //CheckBufDep
+//#define BADBLOCK_DEBUG
+//#define ERASE_DEBUG
+#define BUF_DEBUG
+//#define INIT_DEBUG
+//#define GC_DEBUG
+//#define REQ_DEBUG
+//#define SCHD_DEBUG
+//#define AD_DEBUG
+//#define IO_DEBUG
+//#define XDMA_DEBUG
+
+#ifdef NVME_DEBUG
+#define NVME_PRINT		xil_printf
+#else
+#define NVME_PRINT(...)
+#endif
+
+#ifdef ADDR_DEBUG
+#define ADDR_PRINT		xil_printf
+#else
+#define ADDR_PRINT(...)
+#endif
+
+#ifdef MAIN_DEBUG
+#define MAIN_PRINT		xil_printf
+#else
+#define MAIN_PRINT(...)
+#endif
+
+#ifdef SLICE_DEBUG
+#define SLICE_PRINT		xil_printf
+#else
+#define SLICE_PRINT(...)
+#endif
+
+#ifdef LEVEL_DEBUG
+#define LEVEL_PRINT		xil_printf
+#else
+#define LEVEL_PRINT(...)
+#endif
+
+#ifdef DPEN_DEBUG
+#define DPEN_PRINT		xil_printf
+#else
+#define DPEN_PRINT(...)
+#endif
+
+#ifdef BADBLOCK_DEBUG
+#define BADBLOCK_PRINT  xil_printf
+#else
+#define BADBLOCK_PRINT(...)
+#endif
+
+#ifdef ERASE_DEBUG
+#define ERASE_PRINT  xil_printf
+#else
+#define ERASE_PRINT(...)
+#endif
+
+#ifdef BUF_DEBUG
+#define BUF_PRINT  xil_printf
+#else
+#define BUF_PRINT(...)
+#endif
+
+#ifdef INIT_DEBUG
+#define INIT_PRINT  xil_printf
+#else
+#define INIT_PRINT(...)
+#endif
+
+#ifdef GC_DEBUG
+#define GC_PRINT  xil_printf
+#else
+#define GC_PRINT(...)
+#endif
+
+#ifdef REQ_DEBUG
+#define REQ_PRINT  xil_printf
+#else
+#define REQ_PRINT(...)
+#endif
+
+#ifdef SCHD_DEBUG
+#define SCHD_PRINT  xil_printf
+#else
+#define SCHD_PRINT(...)
+#endif
+
+#ifdef AD_DEBUG
+#define AD_PRINT  xil_printf
+#else
+#define AD_PRINT(...)
+#endif
+
+#ifdef IO_DEBUG
+#define IO_PRINT  xil_printf
+#else
+#define IO_PRINT(...)
+#endif
+
+#ifdef XDMA_DEBUG
+#define XDMA_PRINT  xil_printf
+#else
+#define XDMA_PRINT(...)
+#endif
+
+
 #include "../ftlMain/data_buffer.h"
 #include "../ftlMain/garbage_collection.h"
 #include "../ftlMain/request_allocation.h"

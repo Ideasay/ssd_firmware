@@ -172,7 +172,7 @@ typedef struct _SSD_REQ_FORMAT
 	u64	         prpForEachReq[NVME_BLOCKS_PER_SLICE+1];            //  +1 in case of offset exist!!!!!!!!!!!!!
 	unsigned int dataLengthForSlice[NVME_BLOCKS_PER_SLICE+1];
 	unsigned int cqEn;	// for triggering CQ submmit
-	nvme_cq_entry_t *cqEntry;
+	nvme_cq_entry_t cqEntry;
 } SSD_REQ_FORMAT, *P_SSD_REQ_FORMAT;
 
 #endif /* REQUEST_FORMAT_H_ */

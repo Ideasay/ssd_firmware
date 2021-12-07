@@ -144,7 +144,7 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 		}
 		default:
 		{
-			//xil_printf("Unsupported Admin Command, OPC:%x\n\r", sq_entry->opc);
+			AD_PRINT("Unsupported Admin Command, OPC:%x\n\r", sq_entry->opc);
 			cq_entry->cid = sq_entry->cid;
 			cq_entry->sct = 0;
 			cq_entry->sc = 2;  // invalid field
@@ -197,13 +197,13 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			{
 				usleep(100);
 			}
-			//xil_printf("WRITE ADMIN CQ DONE!\n\r");
+			AD_PRINT("WRITE ADMIN CQ DONE!\n\r");
 	//		xdma_msix_vector_print();
 		}
 
 		if((read_io_sq == TRUE))
 		{
-			//xil_printf("FIND IO SQ CMD!\n\r");
+			AD_PRINT("FIND IO SQ CMD!\n\r");
 			//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
 			//nvmeCmd->cmdSlotTag = 0;
 			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag

@@ -59,10 +59,10 @@ void Print_databuffer()
 	bufEntry = dataBufLruList.headEntry;
 	while(bufEntry != DATA_BUF_NONE)
 	{
-		//xil_printf("0x%x, ",bufEntry);
+		BUF_PRINT("0x%x, ",bufEntry);
 		bufEntry = dataBufMapPtr->dataBuf[bufEntry].nextEntry;
 	}
-	//xil_printf("\n\r");
+	BUF_PRINT("\n\r");
 }
 void InitDataBuf()
 {
@@ -72,7 +72,7 @@ void InitDataBuf()
 	tempDataBufMapPtr = (P_TEMPORARY_DATA_BUF_MAP)TEMPORARY_DATA_BUFFER_MAP_ADDR;
 
 
-	//xil_printf("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
+	BUF_PRINT("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
 
 	for(bufEntry = 0; bufEntry < AVAILABLE_DATA_BUFFER_ENTRY_COUNT; bufEntry++)
 	{
@@ -80,8 +80,8 @@ void InitDataBuf()
 		dataBufMapPtr->dataBuf[bufEntry].prevEntry = bufEntry-1;
 		dataBufMapPtr->dataBuf[bufEntry].nextEntry = bufEntry+1;
 
-		//xil_printf("bufEntry is 0x%x\n", bufEntry);
-		//xil_printf("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
+		BUF_PRINT("bufEntry is 0x%x\n", bufEntry);
+		BUF_PRINT("dataBufMapPtr->dataBuf[bufEntry].nextEntry is 0x%x\n\r ",dataBufMapPtr->dataBuf[bufEntry].nextEntry);
 
 		dataBufMapPtr->dataBuf[bufEntry].dirty = DATA_BUF_CLEAN;
 		dataBufMapPtr->dataBuf[bufEntry].blockingReqTail =  REQ_SLOT_TAG_NONE;
@@ -96,10 +96,12 @@ void InitDataBuf()
 	dataBufMapPtr->dataBuf[AVAILABLE_DATA_BUFFER_ENTRY_COUNT - 1].nextEntry = DATA_BUF_NONE;
 	dataBufLruList.headEntry = 0 ;
 	dataBufLruList.tailEntry = AVAILABLE_DATA_BUFFER_ENTRY_COUNT - 1;
-	//xil_printf("InitDataBuf : dataBufLruList.tailEntry is 0x%x!\n\r", dataBufLruList.tailEntry);
+	BUF_PRINT("InitDataBuf : dataBufLruList.tailEntry is 0x%x!\n\r", dataBufLruList.tailEntry);
 	for(bufEntry = 0; bufEntry < AVAILABLE_TEMPORARY_DATA_BUFFER_ENTRY_COUNT; bufEntry++)
 		tempDataBufMapPtr->tempDataBuf[bufEntry].blockingReqTail =  REQ_SLOT_TAG_NONE;
-	//Print_databuffer();
+#ifdef BUF_DEBUG
+	Print_databuffer();
+#endif
 }
 
 unsigned int CheckDataBufHit(unsigned int reqSlotTag)
@@ -108,40 +110,40 @@ unsigned int CheckDataBufHit(unsigned int reqSlotTag)
 
 	logicalSliceAddr = reqPoolPtr->reqPool[reqSlotTag].logicalSliceAddr;
 	bufEntry = dataBufHashTablePtr->dataBufHash[FindDataBufHashTableEntry(logicalSliceAddr)].headEntry;
-	//xil_printf("CheckDataBufHit here and bufEntry is 0x%x!\n\r",bufEntry);
+	BUF_PRINT("CheckDataBufHit here and bufEntry is 0x%x!\n\r",bufEntry);
 	while(bufEntry != DATA_BUF_NONE)
 	{
-		//xil_printf("while now!\n\r");
+		BUF_PRINT("while now!\n\r");
 		if(dataBufMapPtr->dataBuf[bufEntry].logicalSliceAddr == logicalSliceAddr)
 		{
 			if((dataBufMapPtr->dataBuf[bufEntry].nextEntry != DATA_BUF_NONE) && (dataBufMapPtr->dataBuf[bufEntry].prevEntry != DATA_BUF_NONE))
 			{
-				//xil_printf("1!\n\r");
+				BUF_PRINT("1!\n\r");
 				dataBufMapPtr->dataBuf[dataBufMapPtr->dataBuf[bufEntry].prevEntry].nextEntry = dataBufMapPtr->dataBuf[bufEntry].nextEntry;
 				dataBufMapPtr->dataBuf[dataBufMapPtr->dataBuf[bufEntry].nextEntry].prevEntry = dataBufMapPtr->dataBuf[bufEntry].prevEntry;
 			}
 			else if((dataBufMapPtr->dataBuf[bufEntry].nextEntry == DATA_BUF_NONE) && (dataBufMapPtr->dataBuf[bufEntry].prevEntry != DATA_BUF_NONE))
 			{
-				//xil_printf("2!\n\r");
+				BUF_PRINT("2!\n\r");
 				dataBufMapPtr->dataBuf[dataBufMapPtr->dataBuf[bufEntry].prevEntry].nextEntry = DATA_BUF_NONE;
 				dataBufLruList.tailEntry = dataBufMapPtr->dataBuf[bufEntry].prevEntry;
 			}
 			else if((dataBufMapPtr->dataBuf[bufEntry].nextEntry != DATA_BUF_NONE) && (dataBufMapPtr->dataBuf[bufEntry].prevEntry== DATA_BUF_NONE))
 			{
-				//xil_printf("3!\n\r");
+				BUF_PRINT("3!\n\r");
 				dataBufMapPtr->dataBuf[dataBufMapPtr->dataBuf[bufEntry].nextEntry].prevEntry  = DATA_BUF_NONE;
 				dataBufLruList.headEntry = dataBufMapPtr->dataBuf[bufEntry].nextEntry;
 			}
 			else
 			{
-				//xil_printf("4!\n\r");
+				BUF_PRINT("4!\n\r");
 				dataBufLruList.tailEntry = DATA_BUF_NONE;
 				dataBufLruList.headEntry = DATA_BUF_NONE;
 			}
 
 			if(dataBufLruList.headEntry != DATA_BUF_NONE)
 			{
-				//xil_printf("5!\n\r");
+				BUF_PRINT("5!\n\r");
 				dataBufMapPtr->dataBuf[bufEntry].prevEntry = DATA_BUF_NONE;
 				dataBufMapPtr->dataBuf[bufEntry].nextEntry = dataBufLruList.headEntry;
 				dataBufMapPtr->dataBuf[dataBufLruList.headEntry].prevEntry = bufEntry;
@@ -149,20 +151,22 @@ unsigned int CheckDataBufHit(unsigned int reqSlotTag)
 			}
 			else
 			{
-				//xil_printf("6!\n\r");
+				BUF_PRINT("6!\n\r");
 				dataBufMapPtr->dataBuf[bufEntry].prevEntry = DATA_BUF_NONE;
 				dataBufMapPtr->dataBuf[bufEntry].nextEntry = DATA_BUF_NONE;
 				dataBufLruList.headEntry = bufEntry;
 				dataBufLruList.tailEntry = bufEntry;
 			}
-			//xil_printf("new data buffer list is:\n");
-			//Print_databuffer();
+			BUF_PRINT("new data buffer list is:\n");
+#ifdef BUF_DEBUG
+	Print_databuffer();
+#endif
 			return bufEntry;
 		}
 		else
 			bufEntry = dataBufMapPtr->dataBuf[bufEntry].hashNextEntry;
 	}
-	//xil_printf("return DATA_BUF_FAIL!\n\r");
+	BUF_PRINT("return DATA_BUF_FAIL!\n\r");
 	return DATA_BUF_FAIL;
 }
 

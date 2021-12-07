@@ -347,6 +347,10 @@ void SelectiveGetFromNvmeDmaReqQ(unsigned int reqSlotTag)
 
 	prevReq = reqPoolPtr->reqPool[reqSlotTag].prevReq;
 	nextReq = reqPoolPtr->reqPool[reqSlotTag].nextReq;
+	REQ_PRINT("SelectiveGetFromNvmeDmaReqQ\n\r");
+	REQ_PRINT("reqSlotTag is %d\n\r",reqSlotTag);
+	REQ_PRINT("prevReq is %d\n\r",prevReq);
+	REQ_PRINT("nextReq is %d\n\r",nextReq);
 
 	if((nextReq != REQ_SLOT_TAG_NONE) && (prevReq != REQ_SLOT_TAG_NONE))
 	{
