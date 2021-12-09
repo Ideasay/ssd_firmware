@@ -111,6 +111,7 @@
 #define Pcw2VdieTranslation(chNo, wayNo) ((chNo) + (wayNo) * (USER_CHANNELS))
 #define PlsbPage2VpageTranslation(pageNo) ((pageNo) > (0) ? ( ((pageNo) + 1) / 2): (0))
 
+/* logic addr is useless for OCSSD
 //for logical to virtual translation
 typedef struct _LOGICAL_SLICE_ENTRY {
 	unsigned int virtualSliceAddr;
@@ -119,17 +120,22 @@ typedef struct _LOGICAL_SLICE_ENTRY {
 typedef struct _LOGICAL_SLICE_MAP {
 	LOGICAL_SLICE_ENTRY logicalSlice[SLICES_PER_SSD];
 } LOGICAL_SLICE_MAP, *P_LOGICAL_SLICE_MAP;
-
-
+*/
+/*******************************************************************************************
+ * addr map related struct begin
+ * *****************************************************************************************/
+//we could link this virtual slice to chunk struct
 //for virtual to logical  translation
 typedef struct _VIRTUAL_SLICE_ENTRY {
 	unsigned int logicalSliceAddr;
 } VIRTUAL_SLICE_ENTRY, *P_VIRTUAL_SLICE_ENTRY;
 
+//modify virtual-logical-map to virtual-chunk-map. chunk should contain multiple virtual slices.
 typedef struct _VIRTUAL_SLICE_MAP {
 	VIRTUAL_SLICE_ENTRY virtualSlice[SLICES_PER_SSD];
 } VIRTUAL_SLICE_MAP, *P_VIRTUAL_SLICE_MAP;
 
+//virtual block should be modified to chunk entry
 typedef struct _VIRTUAL_BLOCK_ENTRY {
 	unsigned int bad : 1;
 	unsigned int free : 1;
@@ -145,7 +151,7 @@ typedef struct _VIRTUAL_BLOCK_MAP {
 	VIRTUAL_BLOCK_ENTRY block[USER_DIES][USER_BLOCKS_PER_DIE];
 } VIRTUAL_BLOCK_MAP, *P_VIRTUAL_BLOCK_MAP;
 
-
+//virtual block should be modified to pu entry
 typedef struct _VIRTUAL_DIE_ENTRY {
 	unsigned int currentBlock : 16;
 	unsigned int headFreeBlock : 16;
@@ -159,6 +165,10 @@ typedef struct _VIRTUAL_DIE_ENTRY {
 typedef struct _VIRTUAL_DIE_MAP {
 	VIRTUAL_DIE_ENTRY die[USER_DIES];
 } VIRTUAL_DIE_MAP, *P_VIRTUAL_DIE_MAP;
+
+/*******************************************************************************************
+ * addr map related struct end
+ * *****************************************************************************************/
 
 typedef struct _FRRE_BLOCK_ALLOCATION_LIST {	//free block allocation die sequence list
 	unsigned int headDie : 8;
