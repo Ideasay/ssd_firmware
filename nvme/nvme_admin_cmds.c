@@ -212,6 +212,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	u32* buf = (u32*)BRAM_BUF_BASEADDR;
 	u32 byte_len = 512;
 	u32 data_valid = 0;
+	u32 ocssd_valid = 0;
 	cq_entry->cid = cid;
 	memset(buf, 0x0, byte_len);
 	if(psdt != 0){ // only support physically contiguous region
@@ -238,11 +239,30 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 				data_valid = 1;
 				break;
 			}
+			case OC_LOG_PAGE_ID_CHUNK_INFO:
+			{
+				ocssd_valid = 1;
+				IntigrateMetaData();
+				AD_PRINT("SQ DPTR(L) is 0x%x!\n\r",sq_entry->dptr[0]);
+				AD_PRINT("SQ DPTR(H) is 0x%x!\n\r",sq_entry->dptr[1]);
+				addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
+				write_c2h_dsc(host_base_addr, TOTAL_META_DATA_ADDR,2*CHUNK_NUM_PER_PU*32);
+				while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+				AD_PRINT("get chunk dsc log done!\n\r");
+				break;
+			}
 			default:
 			{
 				data_valid = 0;
 				AD_PRINT("Unsupported LID!\n\r");
 			}
+		}
+		if(ocssd_valid)
+		{
+			cq_entry->sct = 0;
+			cq_entry->sc = 0;
+			AD_PRINT("OCSSD Get Log Page Succeed!\n\r");
+			return;
 		}
 		if(data_valid == 0){
 			cq_entry->sct = 0;
@@ -918,3 +938,118 @@ void cmd_abort(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	cq_entry->command_specific = 0x1;
 }
 
+void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
+{
+	int i;
+	u64 addr_total;
+	P_GEOMETRY_STRUCTURE p_geometry_data;
+	AD_PRINT("Admin Command(Geometry)\n\r");
+	cq_entry->cid = sq_entry->cid;
+	p_geometry_data = (P_GEOMETRY_STRUCTURE)GEOMETRY_DATA_ADDR;
+	//Major Version Number (MJR)
+	p_geometry_data->MJR = 2;
+	//Minor Version Number (MNR)
+	p_geometry_data->MNR = 0;
+	//reserved1
+	p_geometry_data->reserved1[0] = 0;
+	p_geometry_data->reserved1[1] = 0;
+	p_geometry_data->reserved1[2] = 0;
+	p_geometry_data->reserved1[3] = 0;
+	p_geometry_data->reserved1[4] = 0;
+	p_geometry_data->reserved1[5] = 0;
+	//LBA Format(LBAF)
+	p_geometry_data->LBAF = 0;
+	p_geometry_data->GBL = 1;
+	p_geometry_data->PUBL = 0;
+	p_geometry_data->CBL = 1;
+	p_geometry_data->LBBL = 7;
+	//Media and Controller Capabilities (MCCAP)
+	p_geometry_data->MCCAP = 0;
+	p_geometry_data->multiResetChunkEnable = 1;
+	//reserved3
+	for(i = 0 ; i < 12 ; i++)
+	{
+		p_geometry_data->reserved3[i] = 0;
+	}
+    //Wear-level Index Delta Threshold (WIT):
+	p_geometry_data->WIT = 2;
+	//reserved4
+	for(i = 0 ; i < 31 ; i++)
+	{
+		p_geometry_data->reserved4[i] = 0;
+	}
+	//*******************
+	//Geometry Related
+	//*******************
+	//Number of Groups (NUM_GRP)
+	p_geometry_data->NUM_GRP = 2;
+	//Number of parallel units per group (NUM_PU)
+	p_geometry_data->NUM_PU = 1;
+	//Number of chunks per parallel unit (NUM_CHK)
+	p_geometry_data->NUM_CHK = 2;
+	//Chunk Size (CLBA)
+	p_geometry_data->CLBA = 128;
+
+	//reserved5
+	for(i = 0 ; i < 55 ; i++)
+	{
+		p_geometry_data->reserved5[i] = 0;
+	}
+	//**************************
+	//Write Data Requirements
+	//**************************
+	//Minimum Write Size (WS_MIN)
+	p_geometry_data->WS_MIN = 1;
+	//Optimal Write Size (WS_OPT)
+	p_geometry_data->WS_OPT = 1;
+	//Cache Minimum Write Size Units (MW_CUNITS)
+	p_geometry_data->MW_CUNITS = 0;
+	//Maximum Open Chunks (MAXOC)
+	p_geometry_data->MAXOC = 4;
+    //Maximum Open Chunks per PU (MAXOCPU)
+	p_geometry_data->MAXOCPU = 2;
+
+	//reserved6
+	for(i = 0 ; i < 44 ; i++)
+	{
+		p_geometry_data->reserved6[i] = 0;
+	}
+	//*****************************
+	//Performance Related Metrics
+	//*****************************
+	//tRD Typical (TRDT)
+	p_geometry_data->TRDT = 1000000;
+	//tRD Max (TRDM)
+	p_geometry_data->TRDM = 23000000;
+	//tWR Typical (TWRT)
+	p_geometry_data->TWRT = 1000000;
+	//tWR Max (TWRM)
+	p_geometry_data->TWRM = 23000000;
+	//tCRS Typical (TCRST)
+	p_geometry_data->TCRST = 1000000;
+	//tCRS Max (TCRSM)
+	p_geometry_data->TCRSM = 23000000;
+	//reserved7
+	for(i = 0 ; i < 40 ; i++)
+	{
+		p_geometry_data->reserved7[i] = 0;
+	}
+	//reserved8
+	for(i = 0 ; i < 2816 ; i++)
+	{
+		p_geometry_data->reserved8[i] = 0;
+	}
+	//Vendor Specific
+	for(i = 0 ; i < 1024 ; i++)
+	{
+		p_geometry_data->vendorSpecific[i] = 0;
+	}
+	AD_PRINT("SQ DPTR(L) is 0x%x!\n\r",sq_entry->dptr[0]);
+	AD_PRINT("SQ DPTR(H) is 0x%x!\n\r",sq_entry->dptr[1]);
+	addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
+	write_c2h_dsc(addr_total, GEOMETRY_DATA_ADDR,4096);
+	while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+	AD_PRINT("write geometry data ture!\n\r");
+
+
+}

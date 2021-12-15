@@ -2,7 +2,7 @@
 #ifndef FTL_CONFIG_H_
 #define FTL_CONFIG_H_
 
-#include "nsc_driver.h"
+#include "../nsc_driver/nsc_driver.h"
 #include "xparameters.h"
 #include "../nvme/nvme_structs.h"
 
@@ -145,14 +145,14 @@
 #define MB_PER_MIN_FREE_BLOCK_SPACE			(USER_DIES * MB_PER_BLOCK)
 #define MB_PER_METADATA_BLOCK_SPACE			(USER_DIES * MB_PER_BLOCK)
 #define MB_PER_OVER_PROVISION_BLOCK_SPACE	((USER_BLOCKS_PER_SSD / 10) * MB_PER_BLOCK)
-
+//------------------
+// OCSSD PARAM
+//------------------
+#define CHUNK_NUM_PER_PU 2
 
 void InitFTL();
-void InitChCtlReg();
 void InitNandArray();
-void CheckConfigRestriction();
 
 extern unsigned int storageCapacity_L;
-extern V2FMCRegisters* chCtlReg[USER_CHANNELS];
 
 #endif /* FTL_CONFIG_H_ */

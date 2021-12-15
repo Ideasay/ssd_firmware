@@ -42,7 +42,7 @@ void nvme_set_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void nvme_get_feature(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void async_event_req(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 void cmd_abort(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
-
+void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 
 
 

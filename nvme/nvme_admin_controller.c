@@ -142,6 +142,11 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 			break;
 		}
+		case OC_ADMIN_OPECODE_GEOMETRY:
+		{
+			submit_geometry(sq_entry, cq_entry);
+			break;
+		}
 		default:
 		{
 			AD_PRINT("Unsupported Admin Command, OPC:%x\n\r", sq_entry->opc);
@@ -203,7 +208,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 
 		if((read_io_sq == TRUE))
 		{
-			AD_PRINT("FIND IO SQ CMD!\n\r");
+			IO_PRINT("FIND IO SQ CMD!\n\r");
 			//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
 			//nvmeCmd->cmdSlotTag = 0;
 			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag

@@ -87,7 +87,7 @@
  * **********************/
 #include "../nvme/nvme_admin_controller.h"
 #include "../nvme/debug.h"
-#include "../nvme/memory_map.h"
+#include "memory_map.h"
 #include "../nvme/nvme_structs.h"
 
 /************************
@@ -96,82 +96,35 @@
 
 int main()
 {	
+	int ret;
 	//init platform
     init_platform();
     Xil_DCacheDisable();
 	Xil_ICacheDisable();
-	//init FTL & clear whole disk
+	//print dram address
 	ADDR_PRINT("MEMORY_SEGMENTS_START_ADDR is 0x%x\n", MEMORY_SEGMENTS_START_ADDR);
-	ADDR_PRINT("MEMORY_SEGMENTS_END_ADDR is 0x%x\n", MEMORY_SEGMENTS_END_ADDR);
-	ADDR_PRINT("NVME_MANAGEMENT_START_ADDR is 0x%x\n", NVME_MANAGEMENT_START_ADDR);
-	ADDR_PRINT("NVME_MANAGEMENT_END_ADDR is 0x%x\n", NVME_MANAGEMENT_END_ADDR);
-	ADDR_PRINT("RESERVED0_START_ADDR is 0x%x\n", RESERVED0_START_ADDR);
-    ADDR_PRINT("RESERVED0_END_ADDR is 0x%x\n", RESERVED0_END_ADDR);
-    ADDR_PRINT("FTL_MANAGEMENT_START_ADDR is 0x%x\n", FTL_MANAGEMENT_START_ADDR);
-    ADDR_PRINT("DATA_BUFFER_BASE_ADDR is 0x%x\n", DATA_BUFFER_BASE_ADDR);
-    ADDR_PRINT("TEMPORARY_DATA_BUFFER_BASE_ADDR is 0x%x\n", TEMPORARY_DATA_BUFFER_BASE_ADDR);
-    ADDR_PRINT("SPARE_DATA_BUFFER_BASE_ADDR is 0x%x\n", SPARE_DATA_BUFFER_BASE_ADDR);
-    ADDR_PRINT("TEMPORARY_SPARE_DATA_BUFFER_BASE_ADDR is 0x%x\n", TEMPORARY_SPARE_DATA_BUFFER_BASE_ADDR);
-    ADDR_PRINT("RESERVED_DATA_BUFFER_BASE_ADDR is 0x%x\n", RESERVED_DATA_BUFFER_BASE_ADDR);
-    ADDR_PRINT("COMPLETE_FLAG_TABLE_ADDR is 0x%x\n", COMPLETE_FLAG_TABLE_ADDR);
-    ADDR_PRINT("STATUS_REPORT_TABLE_ADDR is 0x%x\n", STATUS_REPORT_TABLE_ADDR);
-    ADDR_PRINT("ERROR_INFO_TABLE_ADDR is 0x%x\n", ERROR_INFO_TABLE_ADDR);
-    ADDR_PRINT("TEMPORARY_PAY_LOAD_ADDR is 0x%x\n", TEMPORARY_PAY_LOAD_ADDR);
-    ADDR_PRINT("DATA_BUFFER_MAP_ADDR is 0x%x\n", DATA_BUFFER_MAP_ADDR);
-    ADDR_PRINT("DATA_BUFFFER_HASH_TABLE_ADDR is 0x%x\n", DATA_BUFFFER_HASH_TABLE_ADDR);
-    ADDR_PRINT("TEMPORARY_DATA_BUFFER_MAP_ADDR is 0x%x\n", TEMPORARY_DATA_BUFFER_MAP_ADDR);
-    ADDR_PRINT("LOGICAL_SLICE_MAP_ADDR is 0x%x\n", LOGICAL_SLICE_MAP_ADDR);
-	ADDR_PRINT("VIRTUAL_SLICE_MAP_ADDR is 0x%x\n", VIRTUAL_SLICE_MAP_ADDR);
-	ADDR_PRINT("VIRTUAL_BLOCK_MAP_ADDR is 0x%x\n", VIRTUAL_BLOCK_MAP_ADDR);
-	ADDR_PRINT("PHY_BLOCK_MAP_ADDR is 0x%x\n", PHY_BLOCK_MAP_ADDR);
-	ADDR_PRINT("BAD_BLOCK_TABLE_INFO_MAP_ADDR is 0x%x\n", BAD_BLOCK_TABLE_INFO_MAP_ADDR);
-	ADDR_PRINT("VIRTUAL_DIE_MAP_ADDR is 0x%x\n", VIRTUAL_DIE_MAP_ADDR);
-	ADDR_PRINT("GC_VICTIM_MAP_ADDR is 0x%x\n", GC_VICTIM_MAP_ADDR);
-	ADDR_PRINT("REQ_POOL_ADDR is 0x%x\n", REQ_POOL_ADDR);
-	ADDR_PRINT("ROW_ADDR_DEPENDENCY_TABLE_ADDR is 0x%x\n", ROW_ADDR_DEPENDENCY_TABLE_ADDR);
-	ADDR_PRINT("DIE_STATE_TABLE_ADDR is 0x%x\n", DIE_STATE_TABLE_ADDR);
-	ADDR_PRINT("RETRY_LIMIT_TABLE_ADDR is 0x%x\n", RETRY_LIMIT_TABLE_ADDR);
-	ADDR_PRINT("WAY_PRIORITY_TABLE_ADDR is 0x%x\n", WAY_PRIORITY_TABLE_ADDR);
-	ADDR_PRINT("FTL_MANAGEMENT_END_ADDR is 0x%x\n", FTL_MANAGEMENT_END_ADDR);
-	ADDR_PRINT("NVME_REQ_SIM_ADDR is 0x%x\n", NVME_REQ_SIM_ADDR);
-	ADDR_PRINT("NVME_DATA_SIM_ADDR is 0x%x\n", NVME_DATA_SIM_ADDR);
-	ADDR_PRINT("PL_SQ_DATA_BUF_BASEADDR is 0x%x\n", PL_SQ_DATA_BUF_BASEADDR);
-	ADDR_PRINT("PL_CQ_DATA_BUF_BASEADDR is 0x%x\n", PL_CQ_DATA_BUF_BASEADDR);
-	ADDR_PRINT("PL_IO_READ_BUF_BASEADDR is 0x%x\n", PL_IO_READ_BUF_BASEADDR);
-	ADDR_PRINT("PL_IO_WRITE_BUF_BASEADDR is 0x%x\n", PL_IO_WRITE_BUF_BASEADDR);
-	ADDR_PRINT("PL_IO_PRP_BUF_BASEADDR is 0x%x\n", PL_IO_PRP_BUF_BASEADDR);
-	ADDR_PRINT("PL_IO_END is 0x%x\n", PL_IO_END);
-	ADDR_PRINT("RESERVED1_START_ADDR is 0x%x\n", RESERVED1_START_ADDR);
-	ADDR_PRINT("RESERVED1_END_ADDR is 0x%x\n", RESERVED1_END_ADDR);
-	ADDR_PRINT("DRAM_END_ADDR is 0x%x\n", DRAM_END_ADDR);
-
+	//init ftl
 	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 	InitFTL();
 	xil_printf("FTL reset complete!!! \r\n");
-
+    //erase experiment block
     eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f800);
     eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f800);
     eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f880);
     eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f880);
-   //xil_printf("erase two channels(addr 0x7f800) complete! \r\n");
     xil_printf("Configure NVMe here! \r\n");
 	// Paging table set
 	#define MB (1024*1024)
 	enable_xdma_channels();
     init_nvme_controller(1);
+
     while(xdma_msi_enable_get() == 0){
     	usleep(100);
     }
-
-
 	//for state machine init
 	unsigned int exeLlr;
-	//volatile NVME_CONTEXT g_nvmeTask;
 	NVME_STATE_E state = NVME_STATE_DISABLED;
-	//g_nvmeTask.status = state;
-
 	//for sq & cq
-	//nvme_cmd_t nvmeCmd;
 	nvme_sq_entry_t admin_sq_entry;
 	nvme_sq_entry_t io_sq_entry;
 	//int flag;
@@ -221,6 +174,15 @@ int main()
 					state = NVME_STATE_SHUTDOWN;
 					//g_nvmeTask.status = state;
 					//init_nvme_controller(1);
+					ret=BackupMetaData();
+					if(ret)
+					{
+						xil_printf("backup success! \n\r");
+					}
+					else
+					{
+						xil_printf("backup fail! \n\r");
+					}
 					set_csts_shst(2);
 					xil_printf("Controller Shutdown \n\r");
 				}
