@@ -93,3 +93,72 @@ int BackupMetaData()
 	}
 	return 1;
 }
+void MaintainMetaData(u32 lba, u32 opCode)
+{
+	P_CHUNK_DESCRIPTOR p_chunk_desc     ;
+	OC_PHYSICAL_ADDRESS physical_address;
+	u32	logical_block_addr	            ;
+	u32	chunk_addr		                ;
+	//u32	pu_addr	     	            ;
+	u32	group_addr	                    ;
+    u32 metaDataBaseAddr                ;
+	physical_address=(OC_PHYSICAL_ADDRESS)lba;
+	logical_block_addr = physical_address.logical_block_addr;
+	chunk_addr = physical_address.chunk_addr;
+	//u32	pu_addr	     	;
+	group_addr = physical_address.group_addr;
+	META_PRINT("logical_block_addr is 0x%x \n\r",logical_block_addr);
+	META_PRINT("chunk_addr is 0x%x \n\r",chunk_addr);
+	META_PRINT("group_addr is 0x%x \n\r",group_addr);
+	if(group_addr == 1)
+	{
+		metaDataBaseAddr = CH1_META_DATA_ADDR;
+	}
+	else
+	{
+		metaDataBaseAddr = CH0_META_DATA_ADDR;
+	}
+	metaDataBaseAddr = metaDataBaseAddr + chunk_addr*32;
+	META_PRINT("metaDataBaseAddr is 0x%x \n\r",metaDataBaseAddr);
+	p_chunk_desc = (P_CHUNK_DESCRIPTOR)metaDataBaseAddr;
+    if(opCode == IO_NVM_READ)
+    {
+    	return;
+    }
+    else if(opCode == IO_NVM_WRITE)
+    {
+    	//Write Pointer
+    	p_chunk_desc->WP = p_chunk_desc->WP + 1;
+    	if(p_chunk_desc->CS == 1)
+    	{
+        	p_chunk_desc->CS = 4;//open
+    	}
+    	else if((p_chunk_desc->CS == 4)&&(p_chunk_desc->WP = 128))
+    	{
+    		p_chunk_desc->CS = 2;//close
+    	}
+    }
+    else if(opCode == IO_NVM_MANAGEMENT)
+    {
+        //wear-level index
+    	p_chunk_desc->WLI = p_chunk_desc->WLI + 1;
+    	if(p_chunk_desc->CS == 1)
+    	{
+        	p_chunk_desc->CS = 1;
+    	}
+    	else if((p_chunk_desc->CS == 2)&&(p_chunk_desc->WLI==255))
+    	{
+    		p_chunk_desc->CS = 8;
+    	}
+    	else if((p_chunk_desc->CS == 2))
+    	{
+    		p_chunk_desc->CS = 0;
+    		p_chunk_desc->WP = 0;
+    	}
+    }
+    else
+    {
+    	ASSERT(0);
+    }
+    return;
+}

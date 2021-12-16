@@ -179,7 +179,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 		//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
 		//nvmeCmd->cmdSlotTag = 0;
 		//here process io cmd contains the transform2slice function.
-		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag
+		need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);//nvmeCmd->cmdSlotTag
 		/*if(need_cqe)
 		{
 		    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)
@@ -211,7 +211,7 @@ void nvme_main_process(u32 read_admin_sq, u32 read_io_sq, nvme_sq_entry_t admin_
 			IO_PRINT("FIND IO SQ CMD!\n\r");
 			//memcpy(nvmeCmd->cmdDword,&io_sq_entry,sizeof(nvme_sq_entry_t));
 			//nvmeCmd->cmdSlotTag = 0;
-			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry,0);//nvmeCmd->cmdSlotTag
+			need_cqe = process_io_cmd(&io_sq_entry, &io_cq_entry);//nvmeCmd->cmdSlotTag
 			/*if(need_cqe)
 			{
 			    while(nvme_write_io_cq_entry(&io_cq_entry) == FALSE)

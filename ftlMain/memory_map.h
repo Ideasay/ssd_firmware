@@ -12,7 +12,7 @@
 //#define IO_DEBUG
 //#define XDMA_DEBUG
 #define META_DEBUG
-
+#define SLICE_DEBUG
 
 #ifdef NVME_DEBUG
 #define NVME_PRINT		xil_printf
@@ -74,6 +74,12 @@
 #define META_PRINT(...)
 #endif
 
+
+#ifdef SLICE_DEBUG
+#define SLICE_PRINT  xil_printf
+#else
+#define SLICE_PRINT(...)
+#endif
 #include "metadata_management.h"
 #include "xparameters.h"
 
@@ -87,8 +93,8 @@
 /**************************************************************
  ******************* ourNVMe Segement begin *******************
  **************************************************************/
-#define MEM_PAGE_WIDTH                  (0xc)  //better to get the value from hardware
-#define LBA_SIZE 				        (0x1000)
+#define MEM_PAGE_WIDTH                  (0xd)  //better to get the value from hardware
+#define LBA_SIZE 				        (0x2000)
 
 // XDMA internal registers base address, XPAR_NVME_CONTROLLER_1004_0_BASEADDR
 #define XDMA_REG_BASEADDR  				(XPAR_NVME_CONTROLLER_0_BASEADDR)

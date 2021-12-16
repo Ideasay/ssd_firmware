@@ -6,6 +6,6 @@
 void InitBuildMeta(u32 base_addr, u32 chNo);
 void InitMetaData();
 void IntigrateMetaData();
-int BackupMetaData();
-
+int  BackupMetaData();
+void MaintainMetaData(u32 lba, u32 opCode);
 #endif /* METADATA_MANAGEMENT_H_ */

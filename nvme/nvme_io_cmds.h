@@ -19,22 +19,24 @@ u32 g_buf[1024];
 #include "nvme_regs.h"
 #include "debug.h"
 
-#include "../ftlMain/request_transform.h"
+
 
 //this header file is used for transform io_cmd to slices.
 //#include "../request_transform.h"
 
 //input should be (nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry) here
 //refer to cosmos handle_nvme_io_cmd(NVME_COMMAND *nvmeCmd)
-int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry, unsigned short cmdSlotTag);
+int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry);
 
 //refer to void handle_nvme_io_read
-void handle_nvme_io_read(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
+void handle_nvme_io_read(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
 
 //refer to void handle_nvme_io_write
-void handle_nvme_io_write(unsigned int cmdSlotTag, nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
+void handle_nvme_io_write(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
 
+void handle_nvme_io_reset(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry);
 
+void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length, nvme_cq_entry_t *cq_entry);
 
 
 

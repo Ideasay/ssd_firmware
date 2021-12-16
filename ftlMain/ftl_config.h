@@ -95,7 +95,7 @@
 //NVMe Controller Specifications
 //------------------------------
 
-#define	BYTES_PER_NVME_BLOCK		4096
+#define	BYTES_PER_NVME_BLOCK		8192
 //#define NVME_BLOCKS_PER_PAGE		(BYTES_PER_DATA_REGION_OF_PAGE / BYTES_PER_NVME_BLOCK)
 
 

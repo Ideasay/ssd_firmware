@@ -1420,4 +1420,46 @@ typedef enum _NVME_SQ_IDENTIFY_CNS_E
 	NVME_SQ_IDENTIFY_CNS_CONTROLLER_SECONDARY_LIST			= 0x15,
 } NVME_SQ_IDENTIFY_CNS_E;
 
+typedef union _OC_PHYSICAL_ADDRESS
+{
+	u32	lba;
+
+	struct
+	{
+		u32	logical_block_addr	:7;
+		u32	chunk_addr		    :1;
+		//u32	pu_addr	     	:0;
+		u32	group_addr	        :1;
+		u32	reserved0		    :23;
+	};
+} OC_PHYSICAL_ADDRESS,*P_OC_PHYSICAL_ADDRESS;
+
+typedef union _nvme_sq_dataset_management_dw10_t
+{
+	u32	dw;
+
+	struct
+	{
+		//Number of Ranges (NR)
+		u32	nr:8;
+		u32	reserve:24;
+	};
+} nvme_sq_dataset_management_dw10_t;
+
+typedef union _nvme_sq_dataset_management_dw11_t
+{
+	u32	dw;
+
+	struct
+	{
+		//Integral Dataset for Read (IDR)
+		u32	idr:1;
+		//Attribute ¨C Integral Dataset for Write (IDW)
+		u32	idw:1;
+		//Attribute ¨C Deallocate (AD)
+		u32	ad:1;
+		u32	reserve:29;
+	};
+} nvme_sq_dataset_management_dw11_t;
+
 #endif	// __NVME_STRUCTS_H__
