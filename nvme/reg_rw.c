@@ -99,7 +99,7 @@ void xdma_msix_vector_print()
 {
 	int N = 16;
 	for (int i = 0; i < 4*N; i++){
-		//u32 value = Xil_In32(XDMA_REG_BASEADDR + XDMA_MSIX_VECTOR_TABLE_ADDR + 4*i);
+		u32 value = Xil_In32(XDMA_REG_BASEADDR + XDMA_MSIX_VECTOR_TABLE_ADDR + 4*i);
 		switch(i%4){
 				case 0: XDMA_PRINT("MSIX Vector Lower Address: 0x%x, ", value);
 					break;

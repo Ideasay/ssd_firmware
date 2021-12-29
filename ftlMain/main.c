@@ -102,7 +102,18 @@ int main()
     Xil_DCacheDisable();
 	Xil_ICacheDisable();
 	//print dram address
-	ADDR_PRINT("MEMORY_SEGMENTS_START_ADDR is 0x%x\n", MEMORY_SEGMENTS_START_ADDR);
+	ADDR_PRINT("CH0_META_DATA_ADDR is 0x%x\n", CH0_META_DATA_ADDR);
+	ADDR_PRINT("CH1_META_DATA_ADDR is 0x%x\n", CH1_META_DATA_ADDR);
+	ADDR_PRINT("TOTAL_META_DATA_ADDR is 0x%x\n", TOTAL_META_DATA_ADDR);
+	ADDR_PRINT("GEOMETRY_DATA_ADDR is 0x%x\n", GEOMETRY_DATA_ADDR);
+	ADDR_PRINT("PREDEFINED_DATA_ADDR is 0x%x\n", PREDEFINED_DATA_ADDR);
+	ADDR_PRINT("PL_SQ_DATA_BUF_BASEADDR is 0x%x\n", PL_SQ_DATA_BUF_BASEADDR);
+	ADDR_PRINT("PL_CQ_DATA_BUF_BASEADDR is 0x%x\n", PL_CQ_DATA_BUF_BASEADDR);
+	ADDR_PRINT("PL_IO_READ_BUF_BASEADDR is 0x%x\n", PL_IO_READ_BUF_BASEADDR);
+	ADDR_PRINT("PL_IO_WRITE_BUF_BASEADDR is 0x%x\n", PL_IO_WRITE_BUF_BASEADDR);
+	ADDR_PRINT("PL_IO_PRP_BUF_BASEADDR is 0x%x\n", PL_IO_PRP_BUF_BASEADDR);
+	ADDR_PRINT("PL_IO_END is 0x%x\n", PL_IO_END);
+
 	//init ftl
 	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 	InitFTL();
@@ -122,7 +133,7 @@ int main()
     	usleep(100);
     }
 	//for state machine init
-	unsigned int exeLlr;
+	//unsigned int exeLlr;
 	NVME_STATE_E state = NVME_STATE_DISABLED;
 	//for sq & cq
 	nvme_sq_entry_t admin_sq_entry;
@@ -130,7 +141,7 @@ int main()
 	//int flag;
 	while(1)
 	{
-		exeLlr = 1;
+		//exeLlr = 1;
 		switch(state)
 		{
 			//COSMOS case NVME_TASK_WAIT_CC_EN	
@@ -193,11 +204,11 @@ int main()
 					u32 read_admin_sq = nvme_read_sq_entry(&admin_sq_entry);
 					u32 read_io_sq    = nvme_read_io_sq_entry(&io_sq_entry);
 					nvme_main_process(read_admin_sq,read_io_sq,admin_sq_entry,io_sq_entry);//,&nvmeCmd
-					if(read_io_sq)
-					{
-						MAIN_PRINT("read_io_sq is valid and exeLlr = 0\n\r");
-						exeLlr = 0;
-					}
+					//if(read_io_sq)
+					//{
+						//MAIN_PRINT("read_io_sq is valid and exeLlr = 0\n\r");
+						//exeLlr = 0;
+					//}
 
 				}
 				break;
@@ -224,11 +235,11 @@ int main()
 
 		}//switch
 		//notCompletedNandReqCnt  blockedReqCnt:extern variates in req_allocation.c
-		if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
-		{
-			CheckDoneNvmeDmaReq();
-			SchedulingNandReq();
-		}
+		//if(exeLlr && ((nvmeDmaReqQ.headReq != REQ_SLOT_TAG_NONE) || notCompletedNandReqCnt || blockedReqCnt))
+		//{
+			//CheckDoneNvmeDmaReq();
+			//SchedulingNandReq();
+		//}
 
 	}//while
 

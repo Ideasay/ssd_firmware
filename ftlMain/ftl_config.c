@@ -69,7 +69,8 @@ void InitFTL()
 void InitNandArray()
 {
 	uint32_t base_addr;
-
+	uint32_t chNo;
+	uint32_t wayNo;
 	for(chNo=0; chNo<USER_CHANNELS; ++chNo)
 		for(wayNo=0; wayNo<USER_WAYS; ++wayNo)
 		{

@@ -2,17 +2,18 @@
 #define MEMORY_MAP_H_
 
 
-//#define NVME_DEBUG
-//#define ADDR_DEBUG
-//#define MAIN_DEBUG
-//#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
-//#define INIT_DEBUG
-//#define REQ_DEBUG
+#define NVME_DEBUG
+#define ADDR_DEBUG
+#define MAIN_DEBUG
+#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
+#define INIT_DEBUG
+#define REQ_DEBUG
 #define AD_DEBUG
-//#define IO_DEBUG
-//#define XDMA_DEBUG
+#define IO_DEBUG
+#define XDMA_DEBUG
 #define META_DEBUG
 #define SLICE_DEBUG
+#define RESET_DEBUG
 
 #ifdef NVME_DEBUG
 #define NVME_PRINT		xil_printf
@@ -80,6 +81,12 @@
 #else
 #define SLICE_PRINT(...)
 #endif
+
+#ifdef RESET_DEBUG
+#define RESET_PRINT  xil_printf
+#else
+#define RESET_PRINT(...)
+#endif
 #include "metadata_management.h"
 #include "xparameters.h"
 
@@ -89,7 +96,7 @@
 #define CH1_META_DATA_ADDR              CH0_META_DATA_ADDR + 0x2000
 #define TOTAL_META_DATA_ADDR            CH1_META_DATA_ADDR + 0x2000
 #define GEOMETRY_DATA_ADDR              TOTAL_META_DATA_ADDR + 0x4000
-
+#define PREDEFINED_DATA_ADDR            GEOMETRY_DATA_ADDR + 0x1000   //size = 2000
 /**************************************************************
  ******************* ourNVMe Segement begin *******************
  **************************************************************/

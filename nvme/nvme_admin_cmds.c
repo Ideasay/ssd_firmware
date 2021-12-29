@@ -210,6 +210,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	AD_PRINT("Admin Command(Get Log Page), cid: %d, nsid: %d, lid = %d\n\r", cid, sq_entry->nsid, sq_entry_dw10.lid);
 
 	u32* buf = (u32*)BRAM_BUF_BASEADDR;
+	//u64 addr_total;
 	u32 byte_len = 512;
 	u32 data_valid = 0;
 	u32 ocssd_valid = 0;
@@ -245,7 +246,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 				IntigrateMetaData();
 				AD_PRINT("SQ DPTR(L) is 0x%x!\n\r",sq_entry->dptr[0]);
 				AD_PRINT("SQ DPTR(H) is 0x%x!\n\r",sq_entry->dptr[1]);
-				addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
+				//addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
 				write_c2h_dsc(host_base_addr, TOTAL_META_DATA_ADDR,2*CHUNK_NUM_PER_PU*32);
 				while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
 				AD_PRINT("get chunk dsc log done!\n\r");
@@ -350,7 +351,7 @@ void identify_namespace_data(u32* buf)
 	memset(namespace_data->eui64, 0x0, 8);
 
 	namespace_data->lba_format[0].ms = 0;
-	namespace_data->lba_format[0].lbads = 0xC;	// 4096 bytes
+	namespace_data->lba_format[0].lbads = 0xD;	// 8192 bytes
 	namespace_data->lba_format[0].rp = 0;
 }
 
@@ -965,7 +966,7 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	p_geometry_data->LBBL = 7;
 	//Media and Controller Capabilities (MCCAP)
 	p_geometry_data->MCCAP = 0;
-	p_geometry_data->multiResetChunkEnable = 1;
+	p_geometry_data->multiResetChunkEnable = MULTI_RESET_EN;
 	//reserved3
 	for(i = 0 ; i < 12 ; i++)
 	{
@@ -1003,7 +1004,7 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	//Optimal Write Size (WS_OPT)
 	p_geometry_data->WS_OPT = 1;
 	//Cache Minimum Write Size Units (MW_CUNITS)
-	p_geometry_data->MW_CUNITS = 0;
+	p_geometry_data->MW_CUNITS = MW_CUNITS_DATA;
 	//Maximum Open Chunks (MAXOC)
 	p_geometry_data->MAXOC = 4;
     //Maximum Open Chunks per PU (MAXOCPU)

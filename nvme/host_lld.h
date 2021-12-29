@@ -3,7 +3,7 @@
 
 //this header is for DMA Transfer
 #include "xparameters.h"
-#include "../nvme/nvme.h"
+//#include "../nvme/nvme.h"
 
 typedef struct _HOST_DMA_FIFO_CNT_REG
 {

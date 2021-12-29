@@ -65,16 +65,19 @@ void handle_nvme_io_write(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
 void handle_nvme_io_reset(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
 {
 	u32 startLba[2];
+	//u32 startLba1;
+	OC_PHYSICAL_ADDRESS physical_address;
 	//u32	logical_block_addr	;
 	u32	chunk_addr		    ;
 	//u32	pu_addr	     	;
 	u32	group_addr	        ;
     u32 baseAddress         ;
     u32 rowAddress          ;
+    u32 reset_valid         ;
 	startLba[0] = sq_entry->dw[10];
 	startLba[1] = sq_entry->dw[11];
 
-
+	physical_address = (OC_PHYSICAL_ADDRESS)startLba[0];
 	//logical_block_addr = physical_address.logical_block_addr;
 	chunk_addr = physical_address.chunk_addr;
 	//u32	pu_addr	     	;
@@ -87,10 +90,17 @@ void handle_nvme_io_reset(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
 	{
 		baseAddress = NSC_0_BASEADDR;
 	}
+	reset_valid = CheckMetaData(startLba[0], IO_NVM_MANAGEMENT, cq_entry);
+	if(reset_valid == 2)
+		goto invalid_reset;
 	rowAddress = chunk_addr<<7;
 	//while((readstatus_70h(way) & (ARDY | RDY)) == 0x00);
 	eraseblock_60h_d0h(baseAddress, 1, rowAddress);
 	MaintainMetaData(startLba[0], IO_NVM_MANAGEMENT);
+	return;
+invalid_reset:
+    RESET_PRINT("invalid reset!\n\r");
+    return;
 }
 int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 {
@@ -100,6 +110,7 @@ int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	nvme_sq_dataset_management_dw11_t dw11;
 	memset(cq_entry, 0x0, sizeof(nvme_cq_entry_t));
 	cq_entry->cid = cid;
+	cq_entry->status = 0;
 	dw11 = (nvme_sq_dataset_management_dw11_t)(sq_entry->cdw11);
 	switch(sq_entry->opc)
 	{
@@ -142,17 +153,18 @@ int process_io_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 
 }
 
-void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length, nvme_cq_entry_t *cq_entry)
+void ReqTransNvmeToSlice(u32 startLba, unsigned int nlb, unsigned int cmdCode, u64 prp1ForReq, u64 prp2ForReq, int prpNum, int start_offset, int data_length, nvme_cq_entry_t *cq_entry)
 {
-	unsigned int reqSlotTag, requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, tempLsa, loop, nvmeBlockOffset, nvmeDmaStartIndex, reqCode;
+	unsigned int  requestedNvmeBlock, tempNumOfNvmeBlock, transCounter, loop, nvmeBlockOffset;
+	u32 tempLsa;
 	//new added for transforming req
 	u64 prpCollectedForSlice[prpNum];
 	int dataLengthForSlice[prpNum];
-	int tempLastSliceOfNvme;
+	//int tempLastSliceOfNvme;
 	int left_length;
 	OC_PHYSICAL_ADDRESS physical_address;
 	u32 i;
-	u32 p , t,prp_array_transfer_count;
+	u32 prp_array_transfer_count;
 	u32 tmp_prp_num;
 	u32 tmp_prp_num_for_cycle;
 
@@ -163,6 +175,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
     u32 baseAddress         ;
     u32 rowAddress          ;
     u32 temp_offset         ;
+    u32 predefined_data_valid=0;
 	//init the first prp
 	int prpCnt = 0;
 	u32 offset_mask = (1<<MEM_PAGE_WIDTH)-1;
@@ -170,7 +183,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 	requestedNvmeBlock = nlb + 1;
 
 	transCounter = 0;
-	nvmeDmaStartIndex = 0;
+
 	tempLsa = startLba / NVME_BLOCKS_PER_SLICE;
 	loop = ((startLba % NVME_BLOCKS_PER_SLICE) + requestedNvmeBlock) / NVME_BLOCKS_PER_SLICE;
 	SLICE_PRINT("ReqTransNvmeToSlice\n\r");
@@ -288,6 +301,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 
 	SLICE_PRINT("nvmeBlockOffset is 0x%x\n\r",nvmeBlockOffset);
 	SLICE_PRINT("numOfNvmeBlock is 0x%x\n\r",tempNumOfNvmeBlock);
+
 	physical_address=(OC_PHYSICAL_ADDRESS)startLba;
 	if(start_offset)
 	{
@@ -306,17 +320,35 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			{
 				baseAddress = NSC_0_BASEADDR;
 			}
-			rowAddress = chunk_addr<<7 + logical_block_addr;
+			rowAddress = (chunk_addr<<7) + logical_block_addr;
 			SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 			SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
-			readpage_00h_30h(base_address, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
-			MaintainMetaData(startLba, cmdCode);
+			predefined_data_valid = CheckMetaData(startLba, cmdCode, cq_entry);
+			if(predefined_data_valid == 0)
+			{
+				readpage_00h_30h(baseAddress, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
+				//MaintainMetaData(startLba, cmdCode);
+			}
 			//trigger DMA here!
 			temp_offset = dataLengthForSlice[prp_array_transfer_count];
-			write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			if(predefined_data_valid == 0)
+			{
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			}
+			else if(predefined_data_valid == 1)
+			{
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			}
 			while((get_io_dma_status() & 0x4) == 0);
 			prp_array_transfer_count++;
-			write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			if(predefined_data_valid == 0)
+			{
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			}
+			else if(predefined_data_valid == 1)
+			{
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);
+			}
 			while((get_io_dma_status() & 0x4) == 0);
 			prp_array_transfer_count++;
 			SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
@@ -326,6 +358,9 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 		{
 			//add by zheng here
 			//trigger DMA here!
+			predefined_data_valid = CheckMetaData(startLba, cmdCode, cq_entry);
+			if(predefined_data_valid==2)
+				goto forbidden_write;
 			temp_offset = dataLengthForSlice[prp_array_transfer_count];
 			write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
 			while((get_io_dma_status() & 0x1) == 0);
@@ -346,7 +381,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			{
 				baseAddress = NSC_0_BASEADDR;
 			}
-			rowAddress = chunk_addr<<7 + logical_block_addr;
+			rowAddress = (chunk_addr<<7) + logical_block_addr;
 			SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 			SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
 			//progpage_80h_10h(uint32_t base_addr, uint32_t way, uint32_t col, uint32_t row, uint32_t length, uint32_t DMARAddress)
@@ -374,13 +409,23 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			{
 				baseAddress = NSC_0_BASEADDR;
 			}
-			rowAddress = chunk_addr<<7 + logical_block_addr;
+			rowAddress = (chunk_addr<<7) + logical_block_addr;
 			SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 			SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
-			readpage_00h_30h(base_address, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
-			MaintainMetaData(startLba, cmdCode);
+
+			predefined_data_valid = CheckMetaData(startLba, cmdCode, cq_entry);
+			if(predefined_data_valid == 0)
+			{
+				readpage_00h_30h(baseAddress, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
+				//MaintainMetaData(startLba, cmdCode);
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			}
+			else if(predefined_data_valid == 1)
+			{
+				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+			}
 			//trigger DMA here! once DMA is enough because there is no offset
-			write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+
 			while((get_io_dma_status() & 0x4) == 0);
 			prp_array_transfer_count++;
 			SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
@@ -389,6 +434,9 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 		if(cmdCode == IO_NVM_WRITE)
 		{
 			//trigger DMA here! once DMA is enough because there is no offset
+			predefined_data_valid = CheckMetaData(startLba, cmdCode, cq_entry);
+			if(predefined_data_valid==2)
+				goto forbidden_write;
 			write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
 			while((get_io_dma_status() & 0x1) == 0);
 			prp_array_transfer_count++;
@@ -406,7 +454,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			{
 				baseAddress = NSC_0_BASEADDR;
 			}
-			rowAddress = chunk_addr<<7 + logical_block_addr;
+			rowAddress = (chunk_addr<<7) + logical_block_addr;
 			SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 			SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
 			//progpage_80h_10h(uint32_t base_addr, uint32_t way, uint32_t col, uint32_t row, uint32_t length, uint32_t DMARAddress)
@@ -441,17 +489,35 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 				{
 					baseAddress = NSC_0_BASEADDR;
 				}
-				rowAddress = chunk_addr<<7 + logical_block_addr;
+				rowAddress = (chunk_addr<<7) + logical_block_addr;
 				SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 				SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
-				readpage_00h_30h(base_address, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
-				MaintainMetaData(startLba, cmdCode);
+				predefined_data_valid = CheckMetaData(tempLsa, cmdCode, cq_entry);
+				if(predefined_data_valid == 0)
+				{
+					readpage_00h_30h(baseAddress, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
+					//MaintainMetaData(startLba, cmdCode);
+				}
 				//trigger DMA here!
 				temp_offset = dataLengthForSlice[prp_array_transfer_count];
-				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				if(predefined_data_valid == 0)
+				{
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
+				else if(predefined_data_valid == 1)
+				{
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
 				while((get_io_dma_status() & 0x4) == 0);
 				prp_array_transfer_count++;
-				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				if(predefined_data_valid == 0)
+				{
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
+				else if(predefined_data_valid == 1)
+				{
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
 				while((get_io_dma_status() & 0x4) == 0);
 				prp_array_transfer_count++;
 				SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
@@ -461,6 +527,9 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			{
 				//add by zheng here
 				//trigger DMA here!
+				predefined_data_valid = CheckMetaData(tempLsa, cmdCode, cq_entry);
+				if(predefined_data_valid==2)
+					goto forbidden_write;
 				temp_offset = dataLengthForSlice[prp_array_transfer_count];
 				write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
 				while((get_io_dma_status() & 0x1) == 0);
@@ -481,7 +550,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 				{
 					baseAddress = NSC_0_BASEADDR;
 				}
-				rowAddress = chunk_addr<<7 + logical_block_addr;
+				rowAddress = (chunk_addr<<7) + logical_block_addr;
 				SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 				SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
 				//progpage_80h_10h(uint32_t base_addr, uint32_t way, uint32_t col, uint32_t row, uint32_t length, uint32_t DMARAddress)
@@ -509,13 +578,21 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 				{
 					baseAddress = NSC_0_BASEADDR;
 				}
-				rowAddress = chunk_addr<<7 + logical_block_addr;
+				rowAddress = (chunk_addr<<7) + logical_block_addr;
 				SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 				SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
-				readpage_00h_30h(base_address, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
-				MaintainMetaData(startLba, cmdCode);
+				predefined_data_valid = CheckMetaData(tempLsa, cmdCode, cq_entry);
+				if(predefined_data_valid == 0)
+				{
+					readpage_00h_30h(baseAddress, 1/*way*/ , 0/*col*/, rowAddress, BYTES_PER_DATA_REGION_OF_PAGE, PL_IO_READ_BUF_BASEADDR);
+				//MaintainMetaData(startLba, cmdCode);
 				//trigger DMA here! once DMA is enough because there is no offset
-				write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
+				else if(predefined_data_valid == 1)
+				{
+					write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+				}
 				while((get_io_dma_status() & 0x4) == 0);
 				prp_array_transfer_count++;
 				SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
@@ -524,6 +601,9 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 			if(cmdCode == IO_NVM_WRITE)
 			{
 				//trigger DMA here! once DMA is enough because there is no offset
+				predefined_data_valid = CheckMetaData(tempLsa, cmdCode, cq_entry);
+				if(predefined_data_valid==2)
+					goto forbidden_write;
 				write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
 				while((get_io_dma_status() & 0x1) == 0);
 				prp_array_transfer_count++;
@@ -541,7 +621,7 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 				{
 					baseAddress = NSC_0_BASEADDR;
 				}
-				rowAddress = chunk_addr<<7 + logical_block_addr;
+				rowAddress = (chunk_addr<<7) + logical_block_addr;
 				SLICE_PRINT("baseAddress is 0x%x!\n\r",baseAddress);
 				SLICE_PRINT("rowAddress is 0x%x!\n\r",rowAddress);
 				//progpage_80h_10h(uint32_t base_addr, uint32_t way, uint32_t col, uint32_t row, uint32_t length, uint32_t DMARAddress)
@@ -566,5 +646,11 @@ void ReqTransNvmeToSlice(unsigned int startLba, unsigned int nlb, unsigned int c
 		SLICE_PRINT("ReqTransNvmeToSlice end!\n\r");
 		return ;
 	}
+
+forbidden_write:
+    SLICE_PRINT("forbidden_write!\n\r");
+    //assert(0);
+    return;
+
 	//Delete operation tail here!
 }

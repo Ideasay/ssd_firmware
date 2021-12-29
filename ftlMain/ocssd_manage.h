@@ -121,22 +121,6 @@ typedef union _GEOMETRY_STRUCTURE_T
 //CAh chunk infomation
 
 //reserved for chunk info header. I think it should be organized by list but not struct
-typedef struct _CHUNK_DESCRIPTOR_LIST_T
-{
-    unsigned int headDescpt;
-    unsigned int tailDescpt;
-    unsigned int desCnt;
-}CHUNK_DESCRIPTOR_LIST, *P_CHUNK_DESCRIPTOR_LIST;
-
-typedef struct _CHUNK_DESCRIPTOR_ENTRY_T
-{
-    CHUNK_DESCRIPTOR chunkDescpt;
-    unsigned int preChunkDescpt;
-    unsigned int nextChunkDescpt;
-    unsigned int groupId;
-    unsigned int puId;
-    unsigned int chunkId;
-}CHUNK_DESCRIPTOR_ENTRY;
 
 //chunk description table
 typedef union _CHUNK_DESCRIPTOR_T
@@ -166,7 +150,7 @@ typedef union _CHUNK_DESCRIPTOR_T
                 u8 wrRandom     :1;
                 u8 reserved2    :2;
                 u8 chunkDeviate :1;//if 1,CNLB specific the nlb of this chunk
-                u8 reserved2    :3;
+                u8 reserved2_2  :3;
             };    
         };
 
@@ -207,6 +191,7 @@ typedef union _OC_MEDIA_FEEDBACK_DW11_T //option
 //oc io cmd has been added into  NVME_NVM_OPCODE_E(nvme_structs.h)
 
 //vector DW struct
+/*
 typedef union _OC_VECTOR_DW10_t
 {
     u32 dw;
@@ -232,15 +217,21 @@ typedef union _OC_VECTOR_DW12_t
 typedef union _OC_VECTOR_DW0_t
 {
     u32 dw;
-    u32 CS_L;//completion status
+    struct
+	{
+    	u32 CS_L;//completion status
+	};
 }OC_VECTOR_DW10;
 
 typedef union _OC_VECTOR_DW1_t
 {
     u32 dw;
-    u32 CS_H;//completion status
+    struct
+	{
+    	u32 CS_H;//completion status
+	};
 }OC_VECTOR_DW11;
-
+*/
 //vector chunk reset cmd and response
 
 

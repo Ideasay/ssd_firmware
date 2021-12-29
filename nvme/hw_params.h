@@ -52,7 +52,7 @@ typedef enum _NVME_IO_OPCODE_E
 #define __HW_PARAMS__
 
 #include "xparameters.h"
-#include "memory_map.h"
+#include "../ftlMain/memory_map.h"
 
 // XDMA internal registers offset address
 #define XDMA_H2C_CHAN_0_CTRL_ADDR    (0x0004)

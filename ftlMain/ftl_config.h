@@ -1,4 +1,5 @@
-
+//write fail Write Next Unit
+//Write fail Chunk Early Close
 #ifndef FTL_CONFIG_H_
 #define FTL_CONFIG_H_
 
@@ -13,6 +14,8 @@
  * ********************/
 #define NVME_SIM        2
 #define PRINT           0
+#define MW_CUNITS_DATA  0
+#define MULTI_RESET_EN  1
 //checks NSC connection, initializes base address
 #ifdef	XPAR_NANDFLASHCONTROLLER_1_BASEADDR
 #define NSC_1_CONNECTED	1

@@ -4,11 +4,11 @@
 #include "debug.h"
 #include "io_access.h"
 
-#include "nvme.h"
+//#include "nvme.h"
 #include "host_lld.h"
 
 #include "../ftlMain/ftl_config.h"
-#include "memory_map.h"
+#include "../ftlMain/memory_map.h"
 #include "../nvme/nvme_transmitter.h"
 extern NVME_CONTEXT g_nvmeTask;
 //extern HOST_DMA_STATUS g_hostDmaStatus;
@@ -207,6 +207,7 @@ void SIM_C2H_DMA(unsigned int lba , unsigned int databuffer_index)
     g_hostDmaStatus.autoDmaTxCnt++;
 }
 */
+/*
 void H2C_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int dataLengthForSlice,u64 offset)
 {
 	u64 addr_total = prpEntry;
@@ -235,4 +236,4 @@ void C2H_DMA_PRP2DATA( u64 prpEntry, unsigned int databuffer_index, unsigned int
     //g_hostDmaStatus.fifoTail.autoDmaRx++;
     //g_hostDmaStatus.autoDmaTxCnt++;
 }
-
+*/
