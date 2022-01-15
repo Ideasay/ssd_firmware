@@ -6,15 +6,10 @@
 #include "../nsc_driver/nsc_driver.h"
 #include "xparameters.h"
 #include "../nvme/nvme_structs.h"
+#include "../nvme/debug.h"
 
-/**********************
- * 0 -> cosmos DMA
- * 1 -> simulation DMA
- * 2 -> our new DMA
- * ********************/
-#define NVME_SIM        2
-#define PRINT           0
-#define MW_CUNITS_DATA  0
+#define WS_OPT_DATA     2  //2 plane
+#define MW_CUNITS_DATA  2  //equal to  WS_OPT_DATA
 #define MULTI_RESET_EN  1
 //checks NSC connection, initializes base address
 #ifdef	XPAR_NANDFLASHCONTROLLER_1_BASEADDR
@@ -124,6 +119,7 @@
 
 #define SLICES_PER_PAGE				(BYTES_PER_DATA_REGION_OF_PAGE / BYTES_PER_DATA_REGION_OF_SLICE)	//a slice directs a page, full page mapping
 #define NVME_BLOCKS_PER_SLICE		(BYTES_PER_DATA_REGION_OF_SLICE / BYTES_PER_NVME_BLOCK)
+#define PRP_PAGES_PER_SLICE		    (BYTES_PER_DATA_REGION_OF_SLICE / PRP_PAGE_SIZE)
 
 #define	USER_DIES					(USER_CHANNELS * USER_WAYS)
 
@@ -151,11 +147,129 @@
 //------------------
 // OCSSD PARAM
 //------------------
-#define CHUNK_NUM_PER_PU 2
-
+#define CHUNK_NUM_PER_PU 256
+#define LB_ADDR_LENGTH 7
+#define CHUNK_ADDR_LENGTH 8
+#define PU_ADDR_LENGTH 0    //nvme struct h
+#define GROUP_ADDR_LENGTH 1
+#define LEFT_LENGTH 32 - GROUP_ADDR_LENGTH - PU_ADDR_LENGTH - CHUNK_ADDR_LENGTH - LB_ADDR_LENGTH
 void InitFTL();
 void InitNandArray();
 
 extern unsigned int storageCapacity_L;
 
 #endif /* FTL_CONFIG_H_ */
+
+//---------------------
+//      DEBUG
+//---------------------
+
+//!!!!!!!!!!!!!!!!!!!!!!!
+#define ERASE_ALL_DEBUG 		//Erase All !!!!!!!!!!!!!!!!
+//!!!!!!!!!!!!!!!!!!!!!!!
+
+#define NVME_DEBUG
+#define ADDR_DEBUG
+#define MAIN_DEBUG
+#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
+#define INIT_DEBUG
+#define REQ_DEBUG
+#define AD_DEBUG
+#define IO_DEBUG
+#define XDMA_DEBUG
+#define META_DEBUG
+#define SLICE_DEBUG
+#define RESET_DEBUG
+#define VECTOR_DEBUG
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef ERASE_ALL_DEBUG
+#define ERASE_ALL  EraseAll
+#else
+#define ERASE_ALL(...)
+#endif
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#ifdef NVME_DEBUG
+#define NVME_PRINT		xil_printf
+#else
+#define NVME_PRINT(...)
+#endif
+
+#ifdef ADDR_DEBUG
+#define ADDR_PRINT		xil_printf
+#else
+#define ADDR_PRINT(...)
+#endif
+
+#ifdef MAIN_DEBUG
+#define MAIN_PRINT		xil_printf
+#else
+#define MAIN_PRINT(...)
+#endif
+
+#ifdef LEVEL_DEBUG
+#define LEVEL_PRINT		xil_printf
+#else
+#define LEVEL_PRINT(...)
+#endif
+
+#ifdef INIT_DEBUG
+#define INIT_PRINT  xil_printf
+#else
+#define INIT_PRINT(...)
+#endif
+
+#ifdef REQ_DEBUG
+#define REQ_PRINT  xil_printf
+#else
+#define REQ_PRINT(...)
+#endif
+
+#ifdef AD_DEBUG
+#define AD_PRINT  xil_printf
+#else
+#define AD_PRINT(...)
+#endif
+
+#ifdef IO_DEBUG
+#define IO_PRINT  xil_printf
+#else
+#define IO_PRINT(...)
+#endif
+
+#ifdef XDMA_DEBUG
+#define XDMA_PRINT  xil_printf
+#else
+#define XDMA_PRINT(...)
+#endif
+
+#ifdef META_DEBUG
+#define META_PRINT  xil_printf
+#else
+#define META_PRINT(...)
+#endif
+
+
+#ifdef SLICE_DEBUG
+#define SLICE_PRINT  xil_printf
+#else
+#define SLICE_PRINT(...)
+#endif
+
+#ifdef RESET_DEBUG
+#define RESET_PRINT  xil_printf
+#else
+#define RESET_PRINT(...)
+#endif
+
+#ifdef VECTOR_DEBUG
+#define VECTOR_PRINT  xil_printf
+#else
+#define VECTOR_PRINT(...)
+#endif
+
+///////////////////////
+
+
+

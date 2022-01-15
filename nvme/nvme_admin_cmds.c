@@ -19,6 +19,8 @@
 
 #include "nvme_admin_cmds.h"
 
+static u64 nc=1;
+
 // SQ/CQ reset due to queue delete
 u32 g_sq_reset = 0;
 u32 g_cq_reset = 0;
@@ -247,9 +249,137 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 				AD_PRINT("SQ DPTR(L) is 0x%x!\n\r",sq_entry->dptr[0]);
 				AD_PRINT("SQ DPTR(H) is 0x%x!\n\r",sq_entry->dptr[1]);
 				//addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
-				write_c2h_dsc(host_base_addr, TOTAL_META_DATA_ADDR,2*CHUNK_NUM_PER_PU*32);
-				while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+				u64 prp1 = sq_entry->prp1;
+				u64 prp2 = sq_entry->prp2;
+				ocssd_sq_get_log_page_dw10_t ocssd_sq_get_log_page_dw10;
+				ocssd_sq_get_log_page_dw10.dw = sq_entry->dw[10];
+				u32 numd = ocssd_sq_get_log_page_dw10.numd;
+				u32 prp_num = ((numd+1)<<2)>>MEM_PAGE_WIDTH;
+				u32 offset_mask = (1<<MEM_PAGE_WIDTH)-1;
+				u32 offset = ((numd+1)<<2) & offset_mask;
+				u32 start_offset = (u32)(prp1) & offset_mask;
+				u32 data_length = (numd+1)<<2;
+				u32 meta_data_addr = TOTAL_META_DATA_ADDR;
+				if(offset!=0)
+				{
+					prp_num = prp_num +1;
+				}
+
+				if(prp_num == 1)
+				{
+					write_c2h_dsc(prp1, TOTAL_META_DATA_ADDR,2*CHUNK_NUM_PER_PU*32);
+					while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+				}
+				else if(prp_num == 2)
+				{
+					u32 fist_lenth = PRP_PAGE_SIZE - start_offset;
+					write_c2h_dsc(prp1, TOTAL_META_DATA_ADDR,fist_lenth);
+					while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+					write_c2h_dsc(prp2, TOTAL_META_DATA_ADDR + fist_lenth,(2*CHUNK_NUM_PER_PU*32)-fist_lenth);
+					while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+				}
+				else //prp num>=3
+				{
+					u64 prpCollectedForSlice[50];
+					u32 dataLengthForSlice[50];
+			        prpCollectedForSlice[0] = prp1;
+			        AD_PRINT("(chunk-log)prp_num >=3\n\r");
+
+			        u32 prpCnt = 1;
+			        dataLengthForSlice[0] = PRP_PAGE_SIZE - start_offset;
+			        u32 left_length = data_length - dataLengthForSlice[0];
+			        AD_PRINT("(chunk-log)prpCollectedForSlice[0](L) is 0x%x!\n\r",prpCollectedForSlice[0]);
+			        AD_PRINT("(chunk-log)prpCollectedForSlice[0](H) is 0x%x!\n\r",prpCollectedForSlice[0]>>32);
+			        AD_PRINT("(chunk-log)dataLengthForSlice[0] is 0x%x!\n\r",dataLengthForSlice[0]);
+					write_c2h_dsc(prpCollectedForSlice[0], meta_data_addr, dataLengthForSlice[0]);
+					while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+					meta_data_addr = meta_data_addr + dataLengthForSlice[0];
+			        int left_prp_num = prp_num-1;
+			        //next prp should be restored in prpCollectedForSlice array also.
+			        u64 next_prplist_addr = prp2;
+			        next_prplist_addr = next_prplist_addr & (0-(1<<2));
+			        //prp_list_start_offset = (u32)(prp[1]) & offset_mask;
+			        int prp_list_start_offset = (u32)(next_prplist_addr) & ((1<<MEM_PAGE_WIDTH)-1);
+			        int prp_offset = prp_list_start_offset >>3;
+			        int prp_max_num = 1<<(MEM_PAGE_WIDTH-3);
+			        u32 tmp_prp_num;
+			        u32 tmp_prp_num_for_cycle;
+			        u32 i = 0;
+			        for (;left_prp_num>0;)
+			        {
+			            if(left_prp_num + prp_offset>prp_max_num)
+			            {
+			                tmp_prp_num = prp_max_num - prp_offset;
+			                left_prp_num = left_prp_num - tmp_prp_num +1;
+			                tmp_prp_num_for_cycle = tmp_prp_num-1;
+			            }
+			            else
+			            {
+			                tmp_prp_num = left_prp_num;
+			                left_prp_num = 0;
+			                tmp_prp_num_for_cycle = tmp_prp_num;
+			            }
+
+			            //we store the prp list in ADDR PL_IO_PRP_BUF_BASEADDR also.
+			            write_ioP_h2c_dsc(next_prplist_addr,PL_AD_PRP_BUF_BASEADDR,tmp_prp_num*8);
+			            while((get_io_dma_status() & 0x2) == 0);
+
+			            u32 rd_data[2];
+			            u64 addr_total;
+
+			            for( i=0;i<tmp_prp_num_for_cycle;i++)
+			            {
+			                rd_data[0]=Xil_In32(PL_AD_PRP_BUF_BASEADDR+i*8);
+			                rd_data[1]=Xil_In32(PL_AD_PRP_BUF_BASEADDR+i*8+4);
+			                addr_total=((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
+			                addr_total= addr_total & (0-(1<<12)) ;
+			                prpCollectedForSlice[prpCnt] = addr_total;
+			                AD_PRINT("(chunk-log)prpCollectedForSlice[%d](L) is 0x%x!\n\r",prpCnt,prpCollectedForSlice[prpCnt]);
+			                AD_PRINT("(chunk-log)prpCollectedForSlice[%d](H) is 0x%x!\n\r",prpCnt,prpCollectedForSlice[prpCnt]>>32);
+			                if(left_length>PRP_PAGE_SIZE)
+			                {
+			                    dataLengthForSlice[prpCnt] = PRP_PAGE_SIZE;
+			                }
+			                else
+			                {
+			                    dataLengthForSlice[prpCnt] = left_length;
+			                }
+			                AD_PRINT("(chunk-log)dataLengthForSlice[%d] is 0x%x!\n\r",prpCnt,dataLengthForSlice[prpCnt]);
+							write_c2h_dsc(prpCollectedForSlice[prpCnt], meta_data_addr, dataLengthForSlice[prpCnt]);
+							while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+							meta_data_addr = meta_data_addr + dataLengthForSlice[prpCnt];
+			                left_length = left_length - dataLengthForSlice[prpCnt++];//tmp_length
+			            }
+			            if(tmp_prp_num_for_cycle == tmp_prp_num-1)
+			            {
+			                rd_data[0]=Xil_In32(PL_AD_PRP_BUF_BASEADDR+i*8);
+			                rd_data[1]=Xil_In32(PL_AD_PRP_BUF_BASEADDR+i*8+4);
+			                next_prplist_addr = ((u64)(rd_data[0]))+((u64)(rd_data[1])<<32);
+			                next_prplist_addr = next_prplist_addr & (0-(1<<2)) ;
+			                prp_offset = (next_prplist_addr & offset_mask)>>3;
+			            }
+			        }//for (;left_prp_num>0;)
+
+				}//else prp num>3
+
+
+
+
 				AD_PRINT("get chunk dsc log done!\n\r");
+				break;
+			}
+			case OC_LOG_CHUNK_NOTIFICATION_LOG:
+			{
+				ocssd_valid = 1;
+				CHUNK_NOTIFICATION_ENTRY* chunk_notification_entry = (void*)CHUNK_LOG_NOTIFICATION_ENTRY;
+				memset((void*)CHUNK_LOG_NOTIFICATION_ENTRY,0,sizeof(CHUNK_NOTIFICATION_ENTRY));
+				chunk_notification_entry->nc = nc;
+				chunk_notification_entry->nsid = 1;
+				chunk_notification_entry->cover_chunk=1;
+				write_c2h_dsc(host_base_addr, CHUNK_LOG_NOTIFICATION_ENTRY,sizeof(CHUNK_NOTIFICATION_ENTRY));
+				while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
+				AD_PRINT("chunk notification done!\n\r");
+				nc++;
 				break;
 			}
 			default:
@@ -284,9 +414,9 @@ void identify_namespace_data(u32* buf)
 	memset(buf, 0, sizeof(nvme_identify_namespace_data_t));
 	nvme_identify_namespace_data_t* namespace_data = (nvme_identify_namespace_data_t*)buf;
 
-	namespace_data->nsze = 0x200ULL;
-	namespace_data->ncap = 0x200ULL;
-	namespace_data->nuse = 0x200ULL;
+	namespace_data->nsze = 0x10000ULL;   //512blocks*128pages
+	namespace_data->ncap = 0x10000ULL;
+	namespace_data->nuse = 0x10000ULL;
 
 	// NSFEAT
 	namespace_data->thin_provisioning = 0;
@@ -351,8 +481,9 @@ void identify_namespace_data(u32* buf)
 	memset(namespace_data->eui64, 0x0, 8);
 
 	namespace_data->lba_format[0].ms = 0;
-	namespace_data->lba_format[0].lbads = 0xD;	// 8192 bytes
+	namespace_data->lba_format[0].lbads = 0xc;	// d:8192 bytes c:4096bytes
 	namespace_data->lba_format[0].rp = 0;
+	namespace_data->vendor_specific[0] =1;
 }
 
 
@@ -946,7 +1077,9 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	P_GEOMETRY_STRUCTURE p_geometry_data;
 	AD_PRINT("Admin Command(Geometry)\n\r");
 	cq_entry->cid = sq_entry->cid;
-	p_geometry_data = (P_GEOMETRY_STRUCTURE)GEOMETRY_DATA_ADDR;
+	//memset((void*)GEOMETRY_DATA_ADDR, 0x00, sizeof(GEOMETRY_STRUCTURE));
+	//AD_PRINT("size of GEOMETRY_STRUCTURE* is %d\n\r",sizeof(GEOMETRY_STRUCTURE*));
+	p_geometry_data = (void*)GEOMETRY_DATA_ADDR;//(P_GEOMETRY_STRUCTURE)
 	//Major Version Number (MJR)
 	p_geometry_data->MJR = 2;
 	//Minor Version Number (MNR)
@@ -959,10 +1092,10 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	p_geometry_data->reserved1[4] = 0;
 	p_geometry_data->reserved1[5] = 0;
 	//LBA Format(LBAF)
-	p_geometry_data->LBAF = 0;
-	p_geometry_data->GBL = 1;
+	p_geometry_data->LBAF = 0;            //initial total
+	p_geometry_data->GBL  = 1;
 	p_geometry_data->PUBL = 0;
-	p_geometry_data->CBL = 1;
+	p_geometry_data->CBL  = 8;
 	p_geometry_data->LBBL = 7;
 	//Media and Controller Capabilities (MCCAP)
 	p_geometry_data->MCCAP = 0;
@@ -987,7 +1120,7 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	//Number of parallel units per group (NUM_PU)
 	p_geometry_data->NUM_PU = 1;
 	//Number of chunks per parallel unit (NUM_CHK)
-	p_geometry_data->NUM_CHK = 2;
+	p_geometry_data->NUM_CHK = 256;
 	//Chunk Size (CLBA)
 	p_geometry_data->CLBA = 128;
 
@@ -1002,13 +1135,13 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	//Minimum Write Size (WS_MIN)
 	p_geometry_data->WS_MIN = 1;
 	//Optimal Write Size (WS_OPT)
-	p_geometry_data->WS_OPT = 1;
+	p_geometry_data->WS_OPT = WS_OPT_DATA;
 	//Cache Minimum Write Size Units (MW_CUNITS)
 	p_geometry_data->MW_CUNITS = MW_CUNITS_DATA;
 	//Maximum Open Chunks (MAXOC)
-	p_geometry_data->MAXOC = 4;
+	p_geometry_data->MAXOC = 0;
     //Maximum Open Chunks per PU (MAXOCPU)
-	p_geometry_data->MAXOCPU = 2;
+	p_geometry_data->MAXOCPU = 0;
 
 	//reserved6
 	for(i = 0 ; i < 44 ; i++)
@@ -1048,7 +1181,7 @@ void submit_geometry(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 	AD_PRINT("SQ DPTR(L) is 0x%x!\n\r",sq_entry->dptr[0]);
 	AD_PRINT("SQ DPTR(H) is 0x%x!\n\r",sq_entry->dptr[1]);
 	addr_total=((u64)(sq_entry->dptr[0]))+((u64)(sq_entry->dptr[1])<<32);
-	write_c2h_dsc(addr_total, GEOMETRY_DATA_ADDR,4096);
+	write_c2h_dsc( addr_total,GEOMETRY_DATA_ADDR,4096);
 	while(((get_c2h_dma_status()) & 0x1) == 0); // data not transferred to Host
 	AD_PRINT("write geometry data ture!\n\r");
 

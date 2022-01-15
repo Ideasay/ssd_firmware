@@ -224,6 +224,21 @@ typedef union _nvme_sq_get_log_page_dw10_t
 	};
 } nvme_sq_get_log_page_dw10_t;
 
+typedef union _ocssd_sq_get_log_page_dw10_t
+{
+	u32	dw;
+
+	struct
+	{
+		u8	lid;
+
+		u8	reserved0;
+
+		u16	numd:12;
+		u16 reserved1:4;
+	};
+} ocssd_sq_get_log_page_dw10_t;
+
 
 typedef union _nvme_sq_get_log_page_dw11_t
 {
@@ -1404,6 +1419,7 @@ typedef enum _NVME_LOG_PAGE_ID_E
 	NVME_LOG_PAGE_ID_RESERVATION_NOTIFICATION			= 0x80,
 	NVME_LOG_PAGE_ID_SANITIZE_STATUS					= 0x81,
 	OC_LOG_PAGE_ID_CHUNK_INFO							= 0xca,
+	OC_LOG_CHUNK_NOTIFICATION_LOG						= 0Xd0,
 } NVME_LOG_PAGE_ID_E;
 
 typedef enum _NVME_SQ_IDENTIFY_CNS_E
@@ -1420,19 +1436,7 @@ typedef enum _NVME_SQ_IDENTIFY_CNS_E
 	NVME_SQ_IDENTIFY_CNS_CONTROLLER_SECONDARY_LIST			= 0x15,
 } NVME_SQ_IDENTIFY_CNS_E;
 
-typedef union _OC_PHYSICAL_ADDRESS
-{
-	u32	lba;
 
-	struct
-	{
-		u32	logical_block_addr	:7;
-		u32	chunk_addr		    :1;
-		//u32	pu_addr	     	:0;
-		u32	group_addr	        :1;
-		u32	reserved0		    :23;
-	};
-} OC_PHYSICAL_ADDRESS,*P_OC_PHYSICAL_ADDRESS;
 
 typedef union _nvme_sq_dataset_management_dw10_t
 {
@@ -1462,4 +1466,16 @@ typedef union _nvme_sq_dataset_management_dw11_t
 	};
 } nvme_sq_dataset_management_dw11_t;
 
+typedef struct _DSM_RANGE{
+union
+{
+    u8 data[16];
+    struct
+    {
+        u32 ContextAttributes         ;
+        u32 LengthInLogicalBlocks     ;
+        u64 StartingLBA               ;
+    };
+};
+}DSM_RANGE, *P_DSM_RANGE;
 #endif	// __NVME_STRUCTS_H__

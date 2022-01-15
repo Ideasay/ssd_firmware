@@ -3,38 +3,12 @@
 
 #include "ftl_config.h"
 #include "../nvme/nvme_structs.h"
-
-//OCSSD Cmd
-typedef union _OC_CMD_T
-{
-    u8 opcode;
-    struct 
-    {
-        u8 dataTransfer :2;
-        u8 function     :5;
-        u8 generic      :1;  
-    };  
-}OC_CMD;
-
 /*****************************************************
- *              admin cmd begin
+ *              admin cmd start
  * **************************************************/
-// the following cmd should replace some cmds in NVME_ADMIN_OPCODE_E
-/*typedef enum _OC_ADMIN_OPCODE_E
-{
-    OC_GEOMETRY             = 0xE2,
-    OC_GET_LOG_PAGE         = 0x02,
-    OC_SET_FEATURE          = 0x09,
-    OC_GET_FEATURE          = 0x0A,
-}OC_ADMIN_OPCODE;*/
-// add above to NVME_ADMIN_OPCODE_E(nvme_struct.h)
-
-//reserved for status field
-
-//reserved for status code
-
 /**********device geometry data structure************/
-typedef union _GEOMETRY_STRUCTURE_T
+typedef struct _GEOMETRY_STRUCTURE_T{
+union
 {
     u8 bytes[4096];
     struct 
@@ -78,7 +52,7 @@ typedef union _GEOMETRY_STRUCTURE_T
         u16 NUM_PU;//byte 67:66
         u32 NUM_CHK;//byte 71:68;
         u32 CLBA;
-        u8  reserved5[55];
+        u8  reserved5[52];
 
         /***************************
          * write data requirements
@@ -113,6 +87,7 @@ typedef union _GEOMETRY_STRUCTURE_T
          * **************************/
         u8  vendorSpecific[1024];
     }; 
+};
 }GEOMETRY_STRUCTURE, *P_GEOMETRY_STRUCTURE;
 
 /**************get log page*******************/
@@ -123,7 +98,8 @@ typedef union _GEOMETRY_STRUCTURE_T
 //reserved for chunk info header. I think it should be organized by list but not struct
 
 //chunk description table
-typedef union _CHUNK_DESCRIPTOR_T
+typedef struct _CHUNK_DESCRIPTOR_T {
+union
 {
     u8 bytes[32];
     struct 
@@ -163,13 +139,14 @@ typedef union _CHUNK_DESCRIPTOR_T
         u64 CNLB;//chunk num of logic block
         u64 WP;//writer pointer;  
     };    
+};
 }CHUNK_DESCRIPTOR ,*P_CHUNK_DESCRIPTOR;
 
 /**************feature specific infomation*******************/
 //feature id has been add to NVME_FEATURE_ID_E(nvme_struct.h)
 //ERROR RECOVERY(05h)  MEDIA FEEDBACK(cah)
 
-typedef union _OC_MEDIA_FEEDBACK_DW11_T //option
+typedef struct _OC_MEDIA_FEEDBACK_DW11_T{union  //option
 {
 	u32	dw;
 
@@ -179,10 +156,65 @@ typedef union _OC_MEDIA_FEEDBACK_DW11_T //option
         u32 VHECC   :1;
         u32 reserved:32;
 	};
-} OC_MEDIA_FEEDBACK_DW11;
+};
+}OC_MEDIA_FEEDBACK_DW11;
 /*****************************************************
  *              admin cmd end
  * **************************************************/
+typedef union _OC_PHYSICAL_ADDRESS
+{
+	u32	lba;
+
+	struct
+	{
+		u32	logical_block_addr	:LB_ADDR_LENGTH;
+		u32	chunk_addr		    :CHUNK_ADDR_LENGTH;
+		//u32	pu_addr	     	:PU_ADDR_LENGTH;
+		u32	group_addr	        :GROUP_ADDR_LENGTH;
+		u32	reserved0		    :LEFT_LENGTH;
+	};
+} OC_PHYSICAL_ADDRESS,*P_OC_PHYSICAL_ADDRESS;
+
+typedef struct _CHUNK_NOTIFICATION_ENTRY
+{
+	u64 nc;
+	u64 lba;
+	u32 nsid;
+	union
+	{
+		u16 s;
+		struct
+		{
+			u16 error_rate_low:1;
+			u16 error_rate_mediium:1;
+			u16 error_rate_high:1;
+			u16 error_rate_unrecoverable:1;
+			u16 chunk_refreshed:1;
+			u16 reserve_s1:3;
+			u16 wli_to_high:1;
+			u16 reserve_s2:7;
+		};
+	};
+
+	union
+	{
+		u8 m;
+		struct
+		{
+			u8 cover_lb:1;
+			u8 cover_chunk:1;
+			u8 cover_pu:1;
+			u8 reserve_m:5;
+		};
+	};
+
+
+	u8 reserve0[9];
+	u16 nlb;
+	u8 reserve1[30];
+
+
+}CHUNK_NOTIFICATION_ENTRY;
 
 /*****************************************************
  *              io cmd begin

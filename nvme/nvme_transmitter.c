@@ -150,7 +150,8 @@ u32 nvme_write_cq_entry(nvme_cq_entry_t* cq_entry)
 {
 	u32 cq_buf_rptr = get_acq_buf_rptr();
 	u32 i;
-    AD_PRINT("cq_buf_rptr: %x\n\r", cq_buf_rptr);
+    AD_PRINT("cq_buf_rptr  : %x\n\r", cq_buf_rptr);
+    AD_PRINT("g_cq_buf_wptr: %x\n\r", g_cq_buf_wptr);
 	if((cq_buf_rptr == (g_cq_buf_wptr + 1)) || ((cq_buf_rptr == 0) && (g_cq_buf_wptr == PL_CQ_ENTRY_NUM - 1))){
 		return FALSE;
 	} else{

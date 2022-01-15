@@ -25,8 +25,8 @@
 #ifndef __NVME_REGS_H__
 #define __NVME_REGS_H__
 
-#define PCI_VENDOR_ID				(0x10ee)
-#define PCI_SUBSYSTEM_VENDOR_ID		(0x10ee)
+#define PCI_VENDOR_ID				(0x1d1d)
+#define PCI_SUBSYSTEM_VENDOR_ID		(0x1d1d)
 #define PCI_SUBSYSTEM_ID			(0x0007)
 #define SERIAL_NUMBER				"NVMe SSD"
 #define MODEL_NUMBER				"NVMe SSD"

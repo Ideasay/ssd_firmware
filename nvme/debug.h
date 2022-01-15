@@ -5,6 +5,7 @@
 #include "assert.h"
 
 #define __ASSERT 1
+#define ASSERT_BRANCH_TMP
 
 #if __ASSERT
 #define ASSERT(X)														\
@@ -17,5 +18,10 @@ if (!(X))																\
 #define ASSERT(X)
 #endif
 
+#ifdef ASSERT_BRANCH_TMP
+#define ASSERT_TMP  ASSERT()
+#else
+#define ASSERT_TMP(...)
+#endif
 #endif
 

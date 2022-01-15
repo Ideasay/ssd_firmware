@@ -2,105 +2,28 @@
 #define MEMORY_MAP_H_
 
 
-#define NVME_DEBUG
-#define ADDR_DEBUG
-#define MAIN_DEBUG
-#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
-#define INIT_DEBUG
-#define REQ_DEBUG
-#define AD_DEBUG
-#define IO_DEBUG
-#define XDMA_DEBUG
-#define META_DEBUG
-#define SLICE_DEBUG
-#define RESET_DEBUG
-
-#ifdef NVME_DEBUG
-#define NVME_PRINT		xil_printf
-#else
-#define NVME_PRINT(...)
-#endif
-
-#ifdef ADDR_DEBUG
-#define ADDR_PRINT		xil_printf
-#else
-#define ADDR_PRINT(...)
-#endif
-
-#ifdef MAIN_DEBUG
-#define MAIN_PRINT		xil_printf
-#else
-#define MAIN_PRINT(...)
-#endif
-
-#ifdef LEVEL_DEBUG
-#define LEVEL_PRINT		xil_printf
-#else
-#define LEVEL_PRINT(...)
-#endif
-
-#ifdef INIT_DEBUG
-#define INIT_PRINT  xil_printf
-#else
-#define INIT_PRINT(...)
-#endif
-
-#ifdef REQ_DEBUG
-#define REQ_PRINT  xil_printf
-#else
-#define REQ_PRINT(...)
-#endif
-
-#ifdef AD_DEBUG
-#define AD_PRINT  xil_printf
-#else
-#define AD_PRINT(...)
-#endif
-
-#ifdef IO_DEBUG
-#define IO_PRINT  xil_printf
-#else
-#define IO_PRINT(...)
-#endif
-
-#ifdef XDMA_DEBUG
-#define XDMA_PRINT  xil_printf
-#else
-#define XDMA_PRINT(...)
-#endif
-
-#ifdef META_DEBUG
-#define META_PRINT  xil_printf
-#else
-#define META_PRINT(...)
-#endif
 
 
-#ifdef SLICE_DEBUG
-#define SLICE_PRINT  xil_printf
-#else
-#define SLICE_PRINT(...)
-#endif
-
-#ifdef RESET_DEBUG
-#define RESET_PRINT  xil_printf
-#else
-#define RESET_PRINT(...)
-#endif
 #include "metadata_management.h"
 #include "xparameters.h"
 
 #define DRAM_START_ADDR					XPAR_DDR4_0_BASEADDR + 0x00100000//XPAR_MIG_0_BASEADDR //xparameters
 
-#define CH0_META_DATA_ADDR              DRAM_START_ADDR
-#define CH1_META_DATA_ADDR              CH0_META_DATA_ADDR + 0x2000
-#define TOTAL_META_DATA_ADDR            CH1_META_DATA_ADDR + 0x2000
-#define GEOMETRY_DATA_ADDR              TOTAL_META_DATA_ADDR + 0x4000
-#define PREDEFINED_DATA_ADDR            GEOMETRY_DATA_ADDR + 0x1000   //size = 2000
+#define CH0_META_DATA_ADDR              DRAM_START_ADDR                 	//size=0x2000
+#define CH1_META_DATA_ADDR              CH0_META_DATA_ADDR + 0x2000     	//size=0x2000
+#define TOTAL_META_DATA_ADDR            CH1_META_DATA_ADDR + 0x2000     	//size=0x4000
+#define GEOMETRY_DATA_ADDR              TOTAL_META_DATA_ADDR + 0x4000   	//size=0x1000
+#define PREDEFINED_DATA_ADDR            GEOMETRY_DATA_ADDR + 0x1000     	//size=0x2000
+#define DSMPRP_DATA_ADDR                PREDEFINED_DATA_ADDR + 0x2000   	//size=0x2000
+#define LBA_LIST_ADDR                   DSMPRP_DATA_ADDR + 0x2000       	//size=0x1000
+#define VECTOR_RESET_CHUNK_DES_ADDR		LBA_LIST_ADDR + 0x1000				//size=0x1000
+#define CHUNK_LOG_NOTIFICATION_ENTRY	VECTOR_RESET_CHUNK_DES_ADDR + 0x1000//size=0x1000
+#define PL_AD_PRP_BUF_BASEADDR	        CHUNK_LOG_NOTIFICATION_ENTRY + 0x1000
 /**************************************************************
- ******************* ourNVMe Segement begin *******************
+ ******************* ourNVMe Segment begin *******************
  **************************************************************/
-#define MEM_PAGE_WIDTH                  (0xd)  //better to get the value from hardware
+#define MEM_PAGE_WIDTH                  (0xc)  //better to get the value from hardware
+#define PRP_PAGE_SIZE                   (1<<MEM_PAGE_WIDTH)
 #define LBA_SIZE 				        (0x2000)
 
 // XDMA internal registers base address, XPAR_NVME_CONTROLLER_1004_0_BASEADDR

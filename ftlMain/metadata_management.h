@@ -11,4 +11,6 @@ void IntigrateMetaData();
 int  BackupMetaData();
 void MaintainMetaData(u32 lba, u32 opCode);
 int CheckMetaData(u32 lba, u32 opCode, nvme_cq_entry_t *cq_entry);
+int ForceUpdateMetadata(u64* lba_list, CHUNK_DESCRIPTOR* chunk_descriptor, u32 nlb);
+void EraseAll();
 #endif /* METADATA_MANAGEMENT_H_ */

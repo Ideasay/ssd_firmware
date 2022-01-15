@@ -57,6 +57,10 @@ void InitFTL()
 {
 	//CheckConfigRestriction();
 	InitNandArray();
+
+	//erase experiment block
+	ERASE_ALL();
+
 	InitMetaData();
 
 	storageCapacity_L = 2*CHUNK_NUM_PER_PU*128*8192;

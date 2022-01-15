@@ -147,6 +147,12 @@ int process_admin_cmd(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 			submit_geometry(sq_entry, cq_entry);
 			break;
 		}
+		case 0x7f:
+		{
+			AD_PRINT("temp for show-reg\n\r");
+			cq_entry->cid = sq_entry->cid;
+			break;
+		}
 		default:
 		{
 			AD_PRINT("Unsupported Admin Command, OPC:%x\n\r", sq_entry->opc);

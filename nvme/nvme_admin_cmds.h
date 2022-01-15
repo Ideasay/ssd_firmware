@@ -28,6 +28,7 @@
 #include "nvme_transmitter.h"
 #include "xil_printf.h"
 #include "../ftlMain/ftl_config.h"
+#include "../ftlMain/ocssd_manage.h"
 u32 g_buf[1024];
 
 #define BRAM_BUF_BASEADDR		(g_buf)

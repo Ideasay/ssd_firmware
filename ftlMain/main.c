@@ -114,15 +114,14 @@ int main()
 	ADDR_PRINT("PL_IO_PRP_BUF_BASEADDR is 0x%x\n", PL_IO_PRP_BUF_BASEADDR);
 	ADDR_PRINT("PL_IO_END is 0x%x\n", PL_IO_END);
 
+
 	//init ftl
 	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 	InitFTL();
 	xil_printf("FTL reset complete!!! \r\n");
-    //erase experiment block
-    eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f800);
-    eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f800);
-    eraseblock_60h_d0h(NSC_0_BASEADDR,1,0x7f880);
-    eraseblock_60h_d0h(NSC_1_BASEADDR,1,0x7f880);
+	AD_PRINT("size of GEOMETRY_STRUCTURE is %d\n\r",sizeof(GEOMETRY_STRUCTURE));
+
+
     xil_printf("Configure NVMe here! \r\n");
 	// Paging table set
 	#define MB (1024*1024)
