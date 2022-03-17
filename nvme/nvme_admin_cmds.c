@@ -368,7 +368,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 				AD_PRINT("get chunk dsc log done!\n\r");
 				break;
 			}
-			case OC_LOG_CHUNK_NOTIFICATION_LOG:
+			/*case OC_LOG_CHUNK_NOTIFICATION_LOG:
 			{
 				ocssd_valid = 1;
 				CHUNK_NOTIFICATION_ENTRY* chunk_notification_entry = (void*)CHUNK_LOG_NOTIFICATION_ENTRY;
@@ -381,7 +381,7 @@ void get_log_page(nvme_sq_entry_t* sq_entry, nvme_cq_entry_t* cq_entry)
 				AD_PRINT("chunk notification done!\n\r");
 				nc++;
 				break;
-			}
+			}*/
 			default:
 			{
 				data_valid = 0;

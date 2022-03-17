@@ -23,7 +23,8 @@ void handle_nvme_io_read(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
     startLba[0] = sq_entry->dw[10];
     startLba[1] = sq_entry->dw[11];
     nlb = sq_entry_dw12->nlb;
-    data_length = (nlb+1)*LBA_SIZE;
+    //data_length = (nlb+1)*LBA_SIZE;
+    data_length = (nlb+1)*FAKE_LBA_SIZE;
     offset_mask = (1<<MEM_PAGE_WIDTH)-1;
     start_offset = (u32)(prp[0]) & offset_mask;
     prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
@@ -53,7 +54,9 @@ void handle_nvme_io_write(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_entry)
     startLba[1] = sq_entry->dw[11];
 
     nlb = sq_entry_dw12->nlb;
-    data_length = (nlb+1)*LBA_SIZE;
+
+    //data_length = (nlb+1)*LBA_SIZE;
+    data_length = (nlb+1)*FAKE_LBA_SIZE;
     offset_mask = (1<<MEM_PAGE_WIDTH)-1;
     start_offset = (u32)(prp[0]) & offset_mask;
     prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
@@ -136,7 +139,8 @@ void handle_nvme_io_vector_read(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_e
     u64 lbal=(((u64)(sq_entry->dw[11]))<<32) + (u64)(sq_entry->dw[10]);
 
     nlb = sq_entry_dw12->nlb;
-    data_length = (nlb+1)*LBA_SIZE;
+    //data_length = (nlb+1)*LBA_SIZE;
+    data_length = (nlb+1)*FAKE_LBA_SIZE;
     offset_mask = (1<<MEM_PAGE_WIDTH)-1;
     start_offset = (u32)(prp[0]) & offset_mask;
     prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
@@ -171,7 +175,9 @@ void handle_nvme_io_vector_write(nvme_sq_entry_t *sq_entry, nvme_cq_entry_t *cq_
     VECTOR_PRINT("vector write:1:lbal_L:0x%x\n\r",sq_entry->dw[10]);
     VECTOR_PRINT("vector write:1:lbal_H:0x%x\n\r",sq_entry->dw[11]);
     nlb = sq_entry_dw12->nlb;
-    data_length = (nlb+1)*LBA_SIZE;
+    //data_length = (nlb+1)*LBA_SIZE;
+    data_length = (nlb+1)*FAKE_LBA_SIZE;
+
     offset_mask = (1<<MEM_PAGE_WIDTH)-1;
     start_offset = (u32)(prp[0]) & offset_mask;
     prp_num = (start_offset + data_length + offset_mask) >> MEM_PAGE_WIDTH;
@@ -704,7 +710,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             //***********************************
             //2nd = 4K mem page size
             //***********************************
-            if(predefined_data_valid == 0)
+            /*if(predefined_data_valid == 0)
             {
                 write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
             }
@@ -715,7 +721,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             //temp offset  is the offset of 8K slice
             temp_offset += dataLengthForSlice[prp_array_transfer_count];  //add 4K
             while((get_io_dma_status() & 0x4) == 0);
-            prp_array_transfer_count++;
+            prp_array_transfer_count++;*/
             //***********************************
             //3rd 0-startoffset in mem page size
             //***********************************
@@ -750,10 +756,10 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             //***********************************
             //2nd = 4K mem page size
             //***********************************
-            write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+            /*write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
             while((get_io_dma_status() & 0x1) == 0);
             temp_offset += dataLengthForSlice[prp_array_transfer_count];
-            prp_array_transfer_count++;
+            prp_array_transfer_count++;*/
 
             //***********************************
             //3rd 0-startoffset in mem page size
@@ -829,7 +835,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             //***********************************
             //4K - 8K mem page size
             //***********************************
-            if(predefined_data_valid == 0)
+            /*if(predefined_data_valid == 0)
             {
                 //MaintainMetaData(startLba, cmdCode);
                 write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
@@ -840,7 +846,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             }
             while((get_io_dma_status() & 0x4) == 0);
             prp_array_transfer_count++;
-            SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
+            SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");*/
         }
 
         if(cmdCode == IO_NVM_WRITE)
@@ -860,10 +866,11 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
             //***********************************
             //4K - 8K mem page size
             //***********************************
-            write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+            /*write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
             while((get_io_dma_status() & 0x1) == 0);
             prp_array_transfer_count++;
             SLICE_PRINT("!!! write data to DDR data buffer!!! \r\n");
+            */
             logical_block_addr = physical_address.logical_block_addr;
             chunk_addr = physical_address.chunk_addr;
             //u32   pu_addr         ;
@@ -939,7 +946,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 //***********************************
                 //4K mem page size
                 //***********************************
-                if(predefined_data_valid == 0)
+                /*if(predefined_data_valid == 0)
                 {
                     write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
                 }
@@ -949,7 +956,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 }
                 while((get_io_dma_status() & 0x4) == 0);
                 temp_offset += dataLengthForSlice[prp_array_transfer_count];
-                prp_array_transfer_count++;
+                prp_array_transfer_count++;*/
                 //***********************************
                 //0 - startoffset mem page size
                 //***********************************
@@ -985,10 +992,10 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 //***********************************
                 //2nd = 4K mem page size
                 //***********************************
-                write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+                /*write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
                 while((get_io_dma_status() & 0x1) == 0);
                 temp_offset += dataLengthForSlice[prp_array_transfer_count];
-                prp_array_transfer_count++;
+                prp_array_transfer_count++;*/
 
                 //***********************************
                 //3rd 0-startoffset in mem page size
@@ -1066,7 +1073,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 //***********************************
                 //4K - 8K mem page size
                 //***********************************
-                if(predefined_data_valid == 0)
+                /*if(predefined_data_valid == 0)
                 {
                     //MaintainMetaData(startLba, cmdCode);
                     write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
@@ -1077,7 +1084,7 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 }
                 while((get_io_dma_status() & 0x4) == 0);
                 prp_array_transfer_count++;
-                SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
+                SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");*/
             }
 
             if(cmdCode == IO_NVM_WRITE)
@@ -1097,10 +1104,11 @@ void MapPRPsToBlock(unsigned int loop,u32 startLba/*block*/, int start_offset/*p
                 //***********************************
                 //4K - 8K mem page size
                 //***********************************
-                write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+                /*write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
                 while((get_io_dma_status() & 0x1) == 0);
                 prp_array_transfer_count++;
                 SLICE_PRINT("!!! write data to DDR data buffer!!! \r\n");
+                */
                 logical_block_addr = physical_address.logical_block_addr;
                 chunk_addr = physical_address.chunk_addr;
                 //u32   pu_addr         ;
@@ -1179,7 +1187,7 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
     	physical_address=(OC_PHYSICAL_ADDRESS)(u32)(lba_list[transCounter]);//OC_PHYSICAL_ADDRESS*
         if(start_offset)
         {
-        	ASSERT(0);//disable this branch zheng
+        	//ASSERT(0);//disable this branch zheng
             VECTOR_PRINT("start offset exist!!!!\n\r");
             if(cmdCode == IO_NVM_PPA_VECTOR_CHUNK_READ)
             {
@@ -1224,17 +1232,17 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
                 //***********************************
                 //4K mem page size
                 //***********************************
-                if(predefined_data_valid == 0)
-                {
-                    write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
-                }
-                else if(predefined_data_valid == 1)
-                {
-                    write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
-                }
-                while((get_io_dma_status() & 0x4) == 0);
-                temp_offset += dataLengthForSlice[prp_array_transfer_count];
-                prp_array_transfer_count++;
+                //if(predefined_data_valid == 0)
+                //{
+                //    write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+                //}
+                //else if(predefined_data_valid == 1)
+                //{
+                //    write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PREDEFINED_DATA_ADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+                //}
+                //while((get_io_dma_status() & 0x4) == 0);
+                //temp_offset += dataLengthForSlice[prp_array_transfer_count];
+                //prp_array_transfer_count++;
                 //***********************************
                 //0 - startoffset mem page size
                 //***********************************
@@ -1270,10 +1278,10 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
                 //***********************************
                 //2nd = 4K mem page size
                 //***********************************
-                write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
+                /*write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
                 while((get_io_dma_status() & 0x1) == 0);
                 temp_offset += dataLengthForSlice[prp_array_transfer_count];
-                prp_array_transfer_count++;
+                prp_array_transfer_count++;*/
 
                 //***********************************
                 //3rd 0-startoffset in mem page size
@@ -1311,7 +1319,7 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
             //add by zheng begin
             if(cmdCode == IO_NVM_PPA_VECTOR_CHUNK_READ)
             {
-            	ASSERT(0);//disable
+            	//ASSERT(0);//disable
                 logical_block_addr = physical_address.logical_block_addr;
                 chunk_addr = physical_address.chunk_addr;
                 //u32   pu_addr         ;
@@ -1352,7 +1360,7 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
                 //***********************************
                 //4K - 8K mem page size
                 //***********************************
-                if(predefined_data_valid == 0)
+                /*if(predefined_data_valid == 0)
                 {
                     //MaintainMetaData(startLba, cmdCode);
                     write_ioD_c2h_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_READ_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
@@ -1363,7 +1371,7 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
                 }
                 while((get_io_dma_status() & 0x4) == 0);
                 prp_array_transfer_count++;
-                SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");
+                SLICE_PRINT("!!! read data from DDR data buffer!!! \r\n");*/
             }
 
             if(cmdCode == IO_NVM_PPA_VECTOR_CHUNK_WRITE)
@@ -1386,12 +1394,13 @@ void MapPRPsToBlockVector(unsigned int loop,u64* lba_list, int start_offset/*prp
                 //***********************************
                 //4K - 8K mem page size
                 //***********************************
-                VECTOR_PRINT("Second prp_L in vector write: 0x%x\n\r",(u32)(prpCollectedForSlice[prp_array_transfer_count]));
+                /*VECTOR_PRINT("Second prp_L in vector write: 0x%x\n\r",(u32)(prpCollectedForSlice[prp_array_transfer_count]));
                 VECTOR_PRINT("Second prp_H in vector write: 0x%x\n\r",(u32)(prpCollectedForSlice[prp_array_transfer_count] >> 32));
                 VECTOR_PRINT("Second data length in vector write: %d\n\r",dataLengthForSlice[prp_array_transfer_count]);
                 write_ioD_h2c_dsc(prpCollectedForSlice[prp_array_transfer_count],PL_IO_WRITE_BUF_BASEADDR + temp_offset,dataLengthForSlice[prp_array_transfer_count]);// unit is byte!
                 while((get_io_dma_status() & 0x1) == 0);
                 prp_array_transfer_count++;
+                */
                 VECTOR_PRINT("!!! write data to DDR data buffer!!! \r\n");
                 logical_block_addr = physical_address.logical_block_addr;
                 chunk_addr = physical_address.chunk_addr;

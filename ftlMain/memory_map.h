@@ -25,6 +25,7 @@
 #define MEM_PAGE_WIDTH                  (0xc)  //better to get the value from hardware
 #define PRP_PAGE_SIZE                   (1<<MEM_PAGE_WIDTH)
 #define LBA_SIZE 				        (0x2000)
+#define FAKE_LBA_SIZE					(0x1000)
 
 // XDMA internal registers base address, XPAR_NVME_CONTROLLER_1004_0_BASEADDR
 #define XDMA_REG_BASEADDR  				(XPAR_NVME_CONTROLLER_0_BASEADDR)

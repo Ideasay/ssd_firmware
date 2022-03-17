@@ -168,19 +168,19 @@ extern unsigned int storageCapacity_L;
 #define ERASE_ALL_DEBUG 		//Erase All !!!!!!!!!!!!!!!!
 //!!!!!!!!!!!!!!!!!!!!!!!
 
-#define NVME_DEBUG
+//#define NVME_DEBUG
 #define ADDR_DEBUG
-#define MAIN_DEBUG
-#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
-#define INIT_DEBUG
-#define REQ_DEBUG
-#define AD_DEBUG
-#define IO_DEBUG
-#define XDMA_DEBUG
-#define META_DEBUG
-#define SLICE_DEBUG
-#define RESET_DEBUG
-#define VECTOR_DEBUG
+//#define MAIN_DEBUG
+//#define LEVEL_DEBUG 	  //ReqTransSliceToLowLevel
+//#define INIT_DEBUG
+//#define REQ_DEBUG
+//#define AD_DEBUG
+//#define IO_DEBUG
+//#define XDMA_DEBUG
+//#define META_DEBUG
+//#define SLICE_DEBUG
+//#define RESET_DEBUG
+//#define VECTOR_DEBUG
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #ifdef ERASE_ALL_DEBUG

@@ -119,7 +119,7 @@ int main()
 	xil_printf("!!! Wait until FTL reset complete !!! \r\n");
 	InitFTL();
 	xil_printf("FTL reset complete!!! \r\n");
-	AD_PRINT("size of GEOMETRY_STRUCTURE is %d\n\r",sizeof(GEOMETRY_STRUCTURE));
+	ADDR_PRINT("size of GEOMETRY_STRUCTURE is %d\n\r",sizeof(GEOMETRY_STRUCTURE));
 
 
     xil_printf("Configure NVMe here! \r\n");
